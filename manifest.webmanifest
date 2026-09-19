@@ -1,0 +1,11 @@
+{
+  "name": "Bender HQ — Liverpool",
+  "short_name": "Bender HQ",
+  "description": "Colin x Cailyn, Liverpool, Thurs-Sun. Scoreboard, route, Scouse decoder, survival kit.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b0d10",
+  "theme_color": "#0b0d10"
+}
