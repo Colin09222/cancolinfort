@@ -629,7 +629,7 @@ const ROWS = [["pint","Pints","p"], ["shot","Shots","s"], ["other","Wine · cock
 const BURN = 0.015, KEEP_S = 96 * 3600;
 
 /* ================= state ================= */
-function blankPerson(i) { return {ts:0, by:"", drinks:[], ls:0, w:"", r:i ? 0.55 : 0.68, hr:i ? "" : HR_DEFAULT, spot:null, act:""}; }
+function blankPerson(i) { return {ts:0, by:"", drinks:[], ls:0, w:"", r:i ? 0.55 : 0.68, hr:i ? "" : HR_DEFAULT, spot:null, act:"", at:"", atTs:0}; }
 const ACTS = ["At the bar","Dancing","Smoking area","Eating","Outside","In a taxi","Gone to bed"];
 const normAct = (a) => a ? (ACTS.find((x) => x.toLowerCase() === String(a).toLowerCase()) || "") : "";
 function cleanPerson(o, i) {
@@ -642,6 +642,7 @@ function cleanPerson(o, i) {
   p.hr = /^https:\/\//i.test(o.hr || "") ? String(o.hr).slice(0, 300) : (o.hr === "" ? "" : p.hr);
   p.spot = Number.isInteger(o.spot) && o.spot >= 0 && o.spot < 6 ? o.spot : null;
   p.act = normAct(o.act);
+  p.at = String(o.at || "").slice(0, 60); p.atTs = +o.atTs || 0;   /* venue name logged by buddehbot (GPS dwell) or by text */
   return p;
 }
 function cleanLoc(o) {
@@ -1219,7 +1220,7 @@ function initMap() {
     const el = document.createElement("div");
     el.innerHTML = spotHTML(s, false, false);
     el.setAttribute("role", "button"); el.setAttribute("aria-label", "Check in at " + s.n);
-    el.addEventListener("click", (e) => { e.stopPropagation(); S.people[S.me].spot = i; queuePerson(S.me, true); buzz(15); toast("Checked in · " + s.n); drawAll(); });
+    el.addEventListener("click", (e) => { e.stopPropagation(); S.people[S.me].spot = i; S.people[S.me].at = ""; queuePerson(S.me, true); buzz(15); toast("Checked in · " + s.n); drawAll(); });
     MAP.spots.push(new maplibregl.Marker({element:el, anchor:"top-left", offset:[-7, -7]}).setLngLat([s.lon, s.lat]).addTo(m));
     MAP.spotKey.push("");
   });
@@ -1299,7 +1300,8 @@ function drawMap() {
   const ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>';
   $("#players").innerHTML = [0, 1].map((w) => {
     const p = S.people[w], L0 = S.loc[w], at = pos[w], bac = bacNow(w);
-    const place = at.kind === "gps" ? (L0.src === "ot" ? "Live · background" : "Live") : at.kind === "spot" ? SPOTS[p.spot].n : "No location";
+    const venue = p.at && Date.now() - p.atTs < 4 * 36e5 ? "At " + p.at : "";
+    const place = venue || (at.kind === "gps" ? (L0.src === "ot" ? "Live · background" : "Live") : at.kind === "spot" ? SPOTS[p.spot].n : "No location");
     const bits = [place];
     if (p.act) bits.push(p.act);
     if (L0) bits.push(ago(L0.ts));
