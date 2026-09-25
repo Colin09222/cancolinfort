@@ -1,11 +1,13 @@
 /* Bender HQ — offline cache.
    Point is simple: once it's loaded on the plane, it keeps working in a pub
    basement in Liverpool with no signal and no roaming data. */
-const CACHE = "bender-hq-v4";
+const CACHE = "bender-hq-v5";
 const TILES = "bender-hq-tiles-v1";
 const FILES = ["./", "./index.html", "./manifest.webmanifest",
                "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png",
-               "./vendor/leaflet.js", "./vendor/leaflet.css", "./vendor/nacl-fast.min.js"];
+               "./vendor/leaflet.js", "./vendor/leaflet.css", "./vendor/nacl-fast.min.js",
+               "./fonts/barlow-400.woff2", "./fonts/barlow-500.woff2", "./fonts/barlow-600.woff2", "./fonts/barlow-700.woff2",
+               "./fonts/barlow-condensed-500.woff2", "./fonts/barlow-condensed-600.woff2", "./fonts/barlow-condensed-700.woff2", "./fonts/barlow-condensed-800.woff2"];
 const MAX_TILES = 1500;
 
 self.addEventListener("install", (e) => {
