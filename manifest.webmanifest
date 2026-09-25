@@ -1,7 +1,7 @@
 {
   "name": "Bender HQ — Liverpool",
   "short_name": "Bender HQ",
-  "description": "Colin × Cailyn, Liverpool, 8–11 October 2026. Live map, scoreboard, field guide and get-home kit. Works offline.",
+  "description": "Colin × Cailyn, Liverpool, 8–11 October 2026. Live 3D map, drinks and BAC, field guide. Works offline.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

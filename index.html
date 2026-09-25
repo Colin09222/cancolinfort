@@ -61,7 +61,7 @@ header.top{position:fixed;top:0;left:0;right:0;z-index:40;pointer-events:none;
 @keyframes beat{70%{box-shadow:0 0 0 7px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
 
 nav.tabs{position:fixed;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom) + 8px);z-index:60;max-width:600px;margin:0 auto;
-  display:grid;grid-template-columns:repeat(5,1fr);height:64px;border-radius:22px;
+  display:grid;grid-template-columns:repeat(4,1fr);height:64px;border-radius:22px;
   background:rgba(22,22,24,.92);-webkit-backdrop-filter:blur(24px) saturate(1.6);backdrop-filter:blur(24px) saturate(1.6);
   border:1px solid var(--line2);box-shadow:0 12px 40px rgba(0,0,0,.55)}
 nav.tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--faint);font:700 11px/1 var(--disp);letter-spacing:.1em;text-transform:uppercase;transition:color .15s}
@@ -340,19 +340,6 @@ ol.days p{margin:5px 0 0;color:var(--mute);font-size:14.5px}
 .word b{display:block;font:800 22px/1 var(--disp);text-transform:uppercase}
 .word span{display:block;margin-top:5px;color:var(--mute);font-size:13.5px;line-height:1.4}
 
-/* ---------- sos ---------- */
-.sos{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
-.sos a{display:block;text-decoration:none;padding:18px 16px;border-radius:18px;background:var(--bad);color:#fff}
-.sos a.b{background:var(--p2);border:1px solid var(--line2)}
-.sos a b{display:block;font:800 54px/.9 var(--disp)}
-.sos a small{display:block;margin-top:6px;font:700 12px/1.2 var(--disp);letter-spacing:.12em;text-transform:uppercase;opacity:.85}
-.addr{margin-top:14px;padding:18px;border-radius:14px;border:1.5px dashed var(--line2);font:800 26px/1.15 var(--disp);text-transform:uppercase;white-space:pre-wrap;min-height:64px}
-.addr.empty{color:var(--faint);font:500 15px/1.4 var(--sans);text-transform:none}
-#driver{position:fixed;inset:0;z-index:100;background:#000;color:#fff;display:none;flex-direction:column;justify-content:center;padding:calc(env(safe-area-inset-top) + 30px) 26px 40px}
-#driver.on{display:flex}
-#driver small{font:700 15px/1 var(--disp);letter-spacing:.18em;text-transform:uppercase;color:#8b8b93}
-#driver div{font:800 clamp(38px,11vw,64px)/1.02 var(--disp);text-transform:uppercase;margin-top:16px;white-space:pre-wrap}
-#driver p{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 24px);text-align:center;color:#5f5f67;font-size:14px}
 .toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 86px);transform:translate(-50%,16px);z-index:90;padding:12px 18px;border-radius:14px;
   background:var(--ink);color:#0a0a0b;font:700 15px/1 var(--disp);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;opacity:0;transition:.25s;pointer-events:none;box-shadow:0 10px 30px rgba(0,0,0,.5)}
 .toast.on{opacity:1;transform:translate(-50%,0)}
@@ -574,28 +561,9 @@ ol.days p{margin:5px 0 0;color:var(--mute);font-size:14.5px}
   </div>
 </section>
 
-<!-- ================= SOS ================= -->
-<section class="view" id="v-home">
-  <div class="kicker">Get home safe</div>
-  <h1 class="big">SOS</h1>
-  <div class="sos">
-    <a href="tel:999"><b>999</b><small>Police · ambulance · fire</small></a>
-    <a href="tel:111" class="b"><b>111</b><small>NHS · urgent, not life-threatening</small></a>
-  </div>
-  <p class="fine">112 works too. Both connect from a locked phone with no credit.</p>
-
-  <h2 class="h">Home is</h2>
-  <div class="addr empty" id="addrBig">Not set yet</div>
-  <button class="btn" id="driverBtn">Show to driver</button>
-  <label class="f">Where you're staying<textarea id="addr" placeholder="Hotel / flat name&#10;Street&#10;Postcode"></textarea></label>
-
-  <h2 class="h">Numbers &amp; notes</h2>
-  <textarea id="notes" placeholder="Colin: +1 …&#10;Cailyn: +1 …&#10;Cab firm: …&#10;Meeting spot if phones die: …"></textarea>
-</section>
 
 </main>
 
-<div id="driver" role="dialog" aria-label="Address for driver"><small>Please take me to</small><div id="driverAddr"></div><p>Tap anywhere to close</p></div>
 <div class="toast" id="toast" role="status"></div>
 
 <nav class="tabs">
@@ -603,7 +571,6 @@ ol.days p{margin:5px 0 0;color:var(--mute);font-size:14.5px}
   <button data-go="night"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12l-1.3 15.2a2 2 0 0 1-2 1.8H9.3a2 2 0 0 1-2-1.8L6 4z"/><path d="M6.5 9h11"/></svg>Tonight</button>
   <button data-go="today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Trip</button>
   <button data-go="guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2z"/></svg>Guide</button>
-  <button data-go="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.5 20h19L12 3z"/><path d="M12 10v4.5M12 17.5h.01"/></svg>SOS</button>
 </nav>
 
 <script src="vendor/maplibre-gl.js"></script>
@@ -974,7 +941,6 @@ function drawToday() {
 
   const stand = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
   const items = [
-    {t:"Hotel address saved",            ok:!!S.addr.trim(), go:"home"},
     {t:"Both weights set for BAC",       ok:parseFloat(S.people[0].w) > 50 && parseFloat(S.people[1].w) > 50, go:"night"},
     {t:"Joined the crew (live sync)",    ok:!!S.crew, go:"crew"},
     {t:"Background GPS set up",          ok:!!S.otLast[S.me], go:"map"},
@@ -1458,7 +1424,6 @@ const WORDS = [
   ["arlarse","Unfair or mean-spirited."],["gis","\"Give us\" — give me. \"Gis a look.\""]
 ];
 $("#words").innerHTML = WORDS.map((w) => '<div class="word"><b>' + w[0] + '</b><span>' + w[1] + "</span></div>").join("");
-function drawAddr() { const a = S.addr.trim(), el = $("#addrBig"); el.textContent = a || "Not set yet"; el.classList.toggle("empty", !a); }
 function drawSettings() {
   [0, 1].forEach((w) => {
     const inp = $("#w" + w); if (document.activeElement !== inp) inp.value = S.people[w].w || "";
@@ -1533,15 +1498,9 @@ $("#resetAll").onclick = () => {
 $("#rate").value = S.rate;
 $("#rate").addEventListener("input", (e) => { const r = parseFloat(e.target.value); if (r > 0) { S.rate = r; S.rateSet = true; save(); drawFx(); drawToday(); } });
 $("#gbp").addEventListener("input", drawFx);
-$("#addr").value = S.addr;
-$("#addr").addEventListener("input", (e) => { S.addr = e.target.value; save(); drawAddr(); drawToday(); });
-$("#notes").value = S.notes;
-$("#notes").addEventListener("input", (e) => { S.notes = e.target.value; save(); });
-$("#driverBtn").onclick = () => { const a = S.addr.trim(); if (!a) { $("#addr").focus(); return; } $("#driverAddr").textContent = a; $("#driver").classList.add("on"); };
-$("#driver").onclick = () => $("#driver").classList.remove("on");
 
 /* ================= boot ================= */
-drawClocks(); drawFx(); drawAddr(); drawAll();
+drawClocks(); drawFx(); drawAll();
 setInterval(drawClocks, 15000);
 setInterval(() => { drawTally(); drawBac(); drawMap(); drawGeo(); drawToday(); }, 60000);
 let startTab = null;

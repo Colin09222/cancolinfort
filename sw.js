@@ -1,7 +1,7 @@
 /* Bender HQ — offline cache.
    Point is simple: once it's loaded on the plane, it keeps working in a pub
    basement in Liverpool with no signal and no roaming data. */
-const CACHE = "bender-hq-v6";
+const CACHE = "bender-hq-v7";
 const TILES = "bender-hq-tiles-v2";
 const FILES = ["./", "./index.html", "./manifest.webmanifest",
                "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png",
