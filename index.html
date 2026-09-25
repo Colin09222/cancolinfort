@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Bender HQ">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="vendor/leaflet.css">
+<link rel="stylesheet" href="vendor/maplibre-gl.css">
 <link rel="preload" href="fonts/barlow-condensed-800.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="icon" href="icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -121,12 +121,15 @@ details[open] summary:after{content:"–"}
 /* ---------- live map ---------- */
 #v-map{position:fixed;inset:0;z-index:1}
 #v-map.on{animation:none}
-#lmap{position:absolute;inset:0;background:#0d0d0f}
-.leaflet-container{background:#0d0d0f;font:inherit}
-.leaflet-tile-pane{filter:grayscale(1) brightness(.5) contrast(1.2)}
-.leaflet-tile-pane .labels{filter:brightness(1.5)}
-.leaflet-control-attribution{background:rgba(10,10,11,.6)!important;color:#6b6b73!important;font-size:9px!important;border-radius:0 0 0 6px;margin-top:calc(env(safe-area-inset-top) + 58px)!important}
-.leaflet-control-attribution a{color:#8b8b93!important;text-decoration:none}
+#lmap{position:absolute;inset:0;background:#0b0b0d}
+.maplibregl-map{font:inherit}
+.maplibregl-canvas{outline:none}
+.maplibregl-ctrl-top-left{top:calc(env(safe-area-inset-top) + 56px)!important}
+.maplibregl-ctrl-attrib{background:rgba(10,10,11,.7)!important;color:#6b6b73!important;font-size:10px!important}
+.maplibregl-ctrl-attrib a{color:#8b8b93!important}
+.maplibregl-ctrl-attrib.maplibregl-compact{min-height:22px;border-radius:12px!important;margin:6px 10px!important}
+.maplibregl-ctrl-attrib-button{filter:invert(1) opacity(.5)}
+.maplibregl-marker{cursor:pointer}
 .fab{position:absolute;right:14px;top:calc(env(safe-area-inset-top) + 84px);z-index:500;display:flex;flex-direction:column;gap:10px}
 .fab button{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:rgba(22,22,24,.92);border:1px solid var(--line2);
   -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 6px 20px rgba(0,0,0,.5)}
@@ -144,7 +147,7 @@ details[open] summary:after{content:"–"}
   font:700 13px/1 var(--disp);letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
 .pin .lab b{color:var(--pc);margin-left:6px}
 @keyframes ping{0%{transform:scale(.8);opacity:.9}100%{transform:scale(2);opacity:0}}
-.spot{position:absolute;left:-6px;top:-6px;display:flex;align-items:center;gap:7px;white-space:nowrap}
+.spot{display:flex;align-items:center;gap:7px;white-space:nowrap}
 .spot i{width:12px;height:12px;border-radius:50%;background:#0a0a0b;border:2.5px solid #d8d8dc;flex:none}
 .spot span{font:700 13px/1 var(--disp);letter-spacing:.08em;text-transform:uppercase;color:#cfcfd4;text-shadow:0 1px 2px #000,0 0 8px #000,0 0 3px #000}
 .spot.hot i{background:#fff;border-color:#fff;box-shadow:0 0 0 5px rgba(255,255,255,.18)}
@@ -603,11 +606,11 @@ ol.days p{margin:5px 0 0;color:var(--mute);font-size:14.5px}
   <button data-go="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.5 20h19L12 3z"/><path d="M12 10v4.5M12 17.5h.01"/></svg>SOS</button>
 </nav>
 
-<script src="vendor/leaflet.js"></script>
+<script src="vendor/maplibre-gl.js"></script>
 <script src="vendor/nacl-fast.min.js"></script>
 <script>
 "use strict";
-/* Bender HQ v5 — map-first redesign. Sync/crypto/BAC/OwnTracks logic unchanged from v4. */
+/* Bender HQ v6 — 3D night map (MapLibre + OpenFreeMap). Sync/crypto/BAC/OwnTracks logic unchanged from v4. */
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const buzz = (ms) => { if (navigator.vibrate) navigator.vibrate(ms || 12); };
@@ -1113,72 +1116,130 @@ function drawChart() {
   hit.addEventListener("touchmove", move, {passive:true}); hit.addEventListener("touchend", () => setTimeout(hide, 1500));
 }
 
-/* ---------- map: Leaflet + CARTO dark tiles, avatar pins, accuracy rings, 3-hour trails ---------- */
+/* ---------- map: MapLibre GL 3D (OpenFreeMap vector tiles, custom night style), pins, glowing trails ---------- */
 /* indices 0-4 match v1/v2 so saved check-ins survive; 5 is Albert Dock */
 const SPOTS = [
   {n:"Concert Sq", lat:53.4028, lon:-2.9814}, {n:"Seel St", lat:53.4018, lon:-2.9810},
   {n:"Bold St", lat:53.4035, lon:-2.9798},    {n:"Baltic Triangle", lat:53.3968, lon:-2.9818},
   {n:"Mathew St", lat:53.4062, lon:-2.9875}, {n:"Albert Dock", lat:53.4003, lon:-2.9923, day:true}
 ];
-const CENTRE = [53.4020, -2.9840];
+const CENTRE = [-2.9832, 53.4020];                 /* [lon, lat] for MapLibre */
+const CAM = {pitch:58, bearing:-22};
 const INIT = ["Co", "Ca"];
-/* Esri World Dark Gray Canvas: free, no key, CORS-enabled; native detail to z16 (upscaled beyond) */
-const ESRI = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/";
-const TILE_URL = ESRI + "World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", LABEL_URL = ESRI + "World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}";
-const MAP = {m:null, pins:[null, null], acc:[null, null], trail:[null, null], spots:[], spotKey:[], pinKey:["", ""], fitted:false, tileErr:0};
+const OFM = "https://tiles.openfreemap.org";
+const NIGHT_STYLE = {
+  version:8,
+  glyphs:OFM + "/fonts/{fontstack}/{range}.pbf",
+  sources:{omt:{type:"vector", url:OFM + "/planet",
+    attribution:'<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> © <a href="https://www.openmaptiles.org/" target="_blank" rel="noopener">OpenMapTiles</a> © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OSM</a>'}},
+  light:{anchor:"viewport", color:"#ffffff", intensity:0.28, position:[1.3, 210, 35]},
+  sky:{"sky-color":"#0b0b0d", "horizon-color":"#1a1a20", "fog-color":"#0b0b0d", "sky-horizon-blend":0.6, "horizon-fog-blend":0.7, "fog-ground-blend":0.25, "atmosphere-blend":0},
+  layers:[
+    {id:"bg", type:"background", paint:{"background-color":"#0b0b0d"}},
+    {id:"green", type:"fill", source:"omt", "source-layer":"park", paint:{"fill-color":"#0e1310"}},
+    {id:"landuse", type:"fill", source:"omt", "source-layer":"landcover", filter:["in", ["get", "class"], ["literal", ["grass", "wood"]]], paint:{"fill-color":"#0e1310", "fill-opacity":0.8}},
+    {id:"water", type:"fill", source:"omt", "source-layer":"water", paint:{"fill-color":"#08131c"}},
+    {id:"waterway", type:"line", source:"omt", "source-layer":"waterway", paint:{"line-color":"#08131c", "line-width":1.5}},
+    {id:"rail", type:"line", source:"omt", "source-layer":"transportation", filter:["==", ["get", "class"], "rail"], paint:{"line-color":"#26262c", "line-width":1.1, "line-dasharray":[3, 3]}},
+    {id:"path", type:"line", source:"omt", "source-layer":"transportation", minzoom:15, filter:["==", ["get", "class"], "path"],
+      paint:{"line-color":"#1a1a1f", "line-width":1, "line-dasharray":[2, 2]}},
+    {id:"road-minor", type:"line", source:"omt", "source-layer":"transportation", filter:["in", ["get", "class"], ["literal", ["minor", "service", "track"]]],
+      layout:{"line-cap":"round", "line-join":"round"}, paint:{"line-color":"#1d1d22", "line-width":["interpolate", ["exponential", 1.6], ["zoom"], 13, 0.6, 16, 4, 19, 18]}},
+    {id:"road-mid", type:"line", source:"omt", "source-layer":"transportation", filter:["in", ["get", "class"], ["literal", ["tertiary", "secondary"]]],
+      layout:{"line-cap":"round", "line-join":"round"}, paint:{"line-color":"#27272e", "line-width":["interpolate", ["exponential", 1.6], ["zoom"], 12, 0.8, 16, 7, 19, 24]}},
+    {id:"road-major", type:"line", source:"omt", "source-layer":"transportation", filter:["in", ["get", "class"], ["literal", ["primary", "trunk", "motorway"]]],
+      layout:{"line-cap":"round", "line-join":"round"}, paint:{"line-color":"#31313a", "line-width":["interpolate", ["exponential", 1.6], ["zoom"], 11, 1, 16, 9, 19, 28]}},
+    {id:"buildings", type:"fill-extrusion", source:"omt", "source-layer":"building", minzoom:13,
+      paint:{"fill-extrusion-color":["interpolate", ["linear"], ["coalesce", ["get", "render_height"], 8], 0, "#15151a", 15, "#1c1c22", 40, "#24242c", 90, "#2e2e38"],
+             "fill-extrusion-height":["interpolate", ["linear"], ["zoom"], 13, 0, 14.6, ["coalesce", ["get", "render_height"], 8]],
+             "fill-extrusion-base":["coalesce", ["get", "render_min_height"], 0], "fill-extrusion-opacity":0.94, "fill-extrusion-vertical-gradient":true}},
+    {id:"water-label", type:"symbol", source:"omt", "source-layer":"water_name", minzoom:12,
+      layout:{"text-field":["upcase", ["coalesce", ["get", "name:en"], ["get", "name"]]], "text-font":["Noto Sans Italic"], "text-size":12, "text-letter-spacing":0.3, "symbol-placement":"point"},
+      paint:{"text-color":"#2f4a5e", "text-halo-color":"#08131c", "text-halo-width":1}},
+    {id:"road-label", type:"symbol", source:"omt", "source-layer":"transportation_name", minzoom:15,
+      layout:{"symbol-placement":"line", "text-field":["upcase", ["coalesce", ["get", "name:en"], ["get", "name"]]], "text-font":["Noto Sans Regular"],
+              "text-size":["interpolate", ["linear"], ["zoom"], 15, 9.5, 18, 12.5], "text-letter-spacing":0.12, "text-max-angle":30},
+      paint:{"text-color":"#62626b", "text-halo-color":"#0b0b0d", "text-halo-width":1.4}},
+    {id:"area-label", type:"symbol", source:"omt", "source-layer":"place", minzoom:12, maxzoom:15.5,
+      filter:["in", ["get", "class"], ["literal", ["suburb", "neighbourhood", "quarter"]]],
+      layout:{"text-field":["upcase", ["coalesce", ["get", "name:en"], ["get", "name"]]], "text-font":["Noto Sans Bold"], "text-size":11, "text-letter-spacing":0.25},
+      paint:{"text-color":"#4a4a52", "text-halo-color":"#0b0b0d", "text-halo-width":1.2}}
+  ]
+};
+const MAP = {m:null, ready:false, pins:[null, null], spots:[], spotKey:[], pinKey:["", ""], fitted:false};
 const fresh = (L, mins) => L && Date.now() - L.ts < mins * 60e3;
 function where(w) {
-  const L = S.loc[w], p = S.people[w];
-  if (fresh(L, 45)) return {kind:"gps", ll:[L.lat, L.lon]};
-  if (p.spot !== null && SPOTS[p.spot]) return {kind:"spot", ll:[SPOTS[p.spot].lat, SPOTS[p.spot].lon]};
+  const L0 = S.loc[w], p = S.people[w];
+  if (fresh(L0, 45)) return {kind:"gps", ll:[L0.lon, L0.lat]};
+  if (p.spot !== null && SPOTS[p.spot]) return {kind:"spot", ll:[SPOTS[p.spot].lon, SPOTS[p.spot].lat]};
   return {kind:"none"};
-}
-function spotIcon(s, hot, covered) {
-  return L.divIcon({className:"", iconSize:[0, 0], html:'<div class="spot' + (hot ? " hot" : "") + (s.day ? " day" : "") + (covered ? " covered" : "") + '"><i></i><span>' + s.n + "</span></div>"});
 }
 function pinState(w, kind) {
   if (kind === "spot") return " spot";
   if (kind !== "gps") return "";
   return fresh(S.loc[w], 3) ? " live" : fresh(S.loc[w], 15) ? "" : " stale";
 }
-function pinIcon(w, kind) {
+function pinHTML(w, kind) {
   const b = bacNow(w);
-  return L.divIcon({className:"", iconSize:[44, 44], iconAnchor:[22, 22],
-    html:'<div class="pin' + pinState(w, kind) + '" style="--pc:' + UI_C[w] + '"><span class="pulse"></span><div class="av">' + INIT[w] + "</div>" +
-         '<div class="lab">' + NAMES[w] + (b ? "<b>" + b.toFixed(2).replace(/^0/, "") + "</b>" : "") + "</div></div>"});
+  return '<div class="pin' + pinState(w, kind) + '" style="--pc:' + UI_C[w] + '"><span class="pulse"></span><div class="av">' + INIT[w] + "</div>" +
+         '<div class="lab">' + NAMES[w] + (b ? "<b>" + b.toFixed(2).replace(/^0/, "") + "</b>" : "") + "</div></div>";
+}
+function spotHTML(s, hot, covered) { return '<div class="spot' + (hot ? " hot" : "") + (s.day ? " day" : "") + (covered ? " covered" : "") + '"><i></i><span>' + s.n + "</span></div>"; }
+/* accuracy ring as a real-world circle polygon */
+function circle(lon, lat, m) {
+  const pts = [], k = 111320, n = 48;
+  for (let i = 0; i <= n; i++) { const a = i / n * 2 * Math.PI; pts.push([lon + m * Math.cos(a) / (k * Math.cos(lat * Math.PI / 180)), lat + m * Math.sin(a) / k]); }
+  return pts;
 }
 function initMap() {
   if (MAP.m) return true;
-  if (!window.L || !$("#lmap").offsetWidth) return false;
-  const m = L.map("lmap", {zoomControl:false, attributionControl:false, center:CENTRE, zoom:15, minZoom:12, maxZoom:19});
-  L.control.attribution({position:"topright", prefix:false}).addTo(m);
-  const tiles = L.tileLayer(TILE_URL, {maxNativeZoom:16, maxZoom:19, crossOrigin:true, className:"base",
-    attribution:'Esri, HERE, Garmin, © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}).addTo(m);
-  L.tileLayer(LABEL_URL, {maxNativeZoom:16, maxZoom:19, crossOrigin:true, className:"labels"}).addTo(m);
-  tiles.on("tileerror", () => { if (++MAP.tileErr > 2) $("#mapBanner").hidden = false; });
-  tiles.on("tileload", () => { if (MAP.tileErr) { MAP.tileErr = 0; $("#mapBanner").hidden = true; } });
-  L.polyline([0, 1, 2, 3, 4].map((i) => [SPOTS[i].lat, SPOTS[i].lon]), {color:"#ffffff", weight:2, opacity:.18, dashArray:"5 8", interactive:false}).addTo(m);
+  if (!window.maplibregl || !$("#lmap").offsetWidth) return false;
+  const probe = document.createElement("canvas");
+  if (!(probe.getContext("webgl2") || probe.getContext("webgl"))) { $("#mapBanner").textContent = "This browser can't draw the 3D map"; $("#mapBanner").hidden = false; return false; }
+  const m = new maplibregl.Map({container:"lmap", style:NIGHT_STYLE, center:CENTRE, zoom:15.3, pitch:CAM.pitch, bearing:CAM.bearing, minZoom:11, maxZoom:19.5, maxPitch:72,
+    attributionControl:false, dragRotate:true, canvasContextAttributes:{antialias:true, preserveDrawingBuffer:/[?&]shot=1/.test(location.search)}});
+  m.addControl(new maplibregl.AttributionControl({compact:true}), "top-left");
+  m.touchZoomRotate.enableRotation();
+  m.on("error", (e) => { if (/fetch|network|load/i.test((e.error && e.error.message) || "")) $("#mapBanner").hidden = navigator.onLine; });
+  m.on("load", () => {
+    m.addSource("route", {type:"geojson", data:{type:"Feature", geometry:{type:"LineString", coordinates:[0, 1, 2, 3, 4].map((i) => [SPOTS[i].lon, SPOTS[i].lat])}}});
+    m.addLayer({id:"route", type:"line", source:"route", layout:{"line-cap":"round"}, paint:{"line-color":"#ffffff", "line-opacity":0.22, "line-width":2, "line-dasharray":[1.5, 2.5]}});
+    m.addSource("acc", {type:"geojson", data:{type:"FeatureCollection", features:[]}});
+    m.addLayer({id:"acc-fill", type:"fill", source:"acc", paint:{"fill-color":["get", "c"], "fill-opacity":0.08}});
+    m.addLayer({id:"acc-line", type:"line", source:"acc", paint:{"line-color":["get", "c"], "line-opacity":0.45, "line-width":1}});
+    m.addSource("trail", {type:"geojson", data:{type:"FeatureCollection", features:[]}, lineMetrics:true});
+    m.addLayer({id:"trail-glow", type:"line", source:"trail", layout:{"line-cap":"round", "line-join":"round"},
+      paint:{"line-color":["get", "c"], "line-width":12, "line-blur":8, "line-opacity":0.35}});
+    m.addLayer({id:"trail", type:"line", source:"trail", layout:{"line-cap":"round", "line-join":"round"},
+      paint:{"line-color":["get", "c"], "line-width":3.5, "line-opacity":0.95}});
+    MAP.ready = true;
+    drawMap();
+  });
   SPOTS.forEach((s, i) => {
-    const mk = L.marker([s.lat, s.lon], {icon:spotIcon(s, false), keyboard:false, title:"Check in at " + s.n}).addTo(m);
-    mk.on("click", () => { S.people[S.me].spot = i; queuePerson(S.me, true); buzz(15); toast("Checked in at " + s.n); drawAll(); });
-    MAP.spots.push(mk); MAP.spotKey.push(false);
+    const el = document.createElement("div");
+    el.innerHTML = spotHTML(s, false, false);
+    el.setAttribute("role", "button"); el.setAttribute("aria-label", "Check in at " + s.n);
+    el.addEventListener("click", (e) => { e.stopPropagation(); S.people[S.me].spot = i; queuePerson(S.me, true); buzz(15); toast("Checked in · " + s.n); drawAll(); });
+    MAP.spots.push(new maplibregl.Marker({element:el, anchor:"top-left", offset:[-7, -7]}).setLngLat([s.lon, s.lat]).addTo(m));
+    MAP.spotKey.push("");
   });
   [0, 1].forEach((w) => {
-    MAP.trail[w] = L.polyline([], {color:UI_C[w], weight:4, opacity:.6, lineCap:"round", lineJoin:"round", interactive:false}).addTo(m);
-    MAP.acc[w] = L.circle(CENTRE, {radius:1, color:UI_C[w], weight:1, opacity:.45, fillColor:UI_C[w], fillOpacity:.07, interactive:false});
-    MAP.pins[w] = L.marker(CENTRE, {icon:pinIcon(w, "none"), zIndexOffset:1000 + w, keyboard:false});
-    MAP.pins[w].on("click", () => { const at = where(w); if (at.kind !== "none") m.setView(at.ll, Math.max(m.getZoom(), 16)); });
+    const el = document.createElement("div");
+    el.addEventListener("click", (e) => { e.stopPropagation(); const at = where(w); if (at.kind !== "none") m.flyTo({center:at.ll, zoom:17, pitch:62, padding:camPad(), duration:900}); });
+    MAP.pins[w] = new maplibregl.Marker({element:el, anchor:"center"}).setLngLat(CENTRE);
+    MAP.pins[w].el = el;
   });
   MAP.m = m;
   return true;
 }
+function camPad() { return {top:130, bottom:sheetCover() + 50, left:80, right:90}; }
 function fitMap(which) {
   if (!MAP.m) return;
   const pts = (which === "me" ? [S.me] : [0, 1]).map(where).filter((a) => a.kind !== "none").map((a) => a.ll);
-  if (!pts.length) { MAP.m.setView(CENTRE, 15); if (which === "me") toast("No location yet"); return; }
-  const pad = {paddingTopLeft:[40, 110], paddingBottomRight:[70, sheetCover() + 30], maxZoom:16};
-  if (pts.length === 1) MAP.m.fitBounds(L.latLngBounds([pts[0], pts[0]]), pad);
-  else MAP.m.fitBounds(L.latLngBounds(pts), pad);
+  if (!pts.length) { MAP.m.easeTo({center:CENTRE, zoom:15.3, pitch:CAM.pitch, bearing:CAM.bearing, padding:camPad(), duration:900}); if (which === "me") toast("No location yet"); return; }
+  if (pts.length === 1) { MAP.m.easeTo({center:pts[0], zoom:16.6, pitch:CAM.pitch, bearing:CAM.bearing, padding:camPad(), duration:900}); return; }
+  const b = new maplibregl.LngLatBounds(pts[0], pts[0]); pts.forEach((p) => b.extend(p));
+  MAP.m.fitBounds(b, {padding:camPad(), maxZoom:16.8, pitch:CAM.pitch, bearing:CAM.bearing, duration:1000});
 }
 /* one continuous trail per person: skip jitter (<15 m within a minute), keep 3 h, max 400 points */
 function addTrail(w, L0) {
@@ -1198,27 +1259,32 @@ function setLoc(w, L0) {
 function drawMap() {
   const pos = [0, 1].map(where);
   if (initMap()) {
+    const m = MAP.m;
     SPOTS.forEach((s, i) => {
       const hot = S.people[0].spot === i || S.people[1].spot === i;
-      const covered = pos.some((a) => a.kind !== "none" && haversine({lat:a.ll[0], lon:a.ll[1]}, s) < 45);
+      const covered = pos.some((a) => a.kind !== "none" && haversine({lat:a.ll[1], lon:a.ll[0]}, s) < 45);
       const key = hot + "|" + covered;
-      if (MAP.spotKey[i] !== key) { MAP.spotKey[i] = key; MAP.spots[i].setIcon(spotIcon(s, hot, covered)); }
+      if (MAP.spotKey[i] !== key) { MAP.spotKey[i] = key; MAP.spots[i].getElement().innerHTML = spotHTML(s, hot, covered); }
     });
-    const cut = Date.now() - 3 * 36e5;
+    const cut = Date.now() - 3 * 36e5, acc = [], trails = [];
     [0, 1].forEach((w) => {
-      const at = pos[w], pin = MAP.pins[w], acc = MAP.acc[w], L0 = S.loc[w];
-      if (at.kind === "none") { pin.remove(); acc.remove(); MAP.pinKey[w] = ""; }
+      const at = pos[w], pin = MAP.pins[w], L0 = S.loc[w];
+      if (at.kind === "none") { pin.remove(); MAP.pinKey[w] = ""; }
       else {
         const b = bacNow(w), key = at.kind + pinState(w, at.kind) + (b ? b.toFixed(2) : "");
-        pin.setLatLng(at.ll);
-        if (MAP.pinKey[w] !== key) { MAP.pinKey[w] = key; pin.setIcon(pinIcon(w, at.kind)); }
-        if (!MAP.m.hasLayer(pin)) pin.addTo(MAP.m);
-        if (at.kind === "gps" && L0.acc > 10) { acc.setLatLng(at.ll).setRadius(Math.min(L0.acc, 400)); if (!MAP.m.hasLayer(acc)) acc.addTo(MAP.m); }
-        else acc.remove();
+        pin.setLngLat(at.ll);
+        if (MAP.pinKey[w] !== key) { MAP.pinKey[w] = key; pin.el.innerHTML = pinHTML(w, at.kind); }
+        if (!pin.getElement().isConnected) pin.addTo(m);
+        if (at.kind === "gps" && L0.acc > 10) acc.push({type:"Feature", properties:{c:UI_C[w]}, geometry:{type:"Polygon", coordinates:[circle(L0.lon, L0.lat, Math.min(L0.acc, 400))]}});
       }
-      MAP.trail[w].setLatLngs((S.trail[w] || []).filter((t) => t[2] >= cut).map((t) => [t[0], t[1]]));
+      const pts = (S.trail[w] || []).filter((t) => t[2] >= cut).map((t) => [t[1], t[0]]);
+      if (pts.length > 1) trails.push({type:"Feature", properties:{c:UI_C[w]}, geometry:{type:"LineString", coordinates:pts}});
     });
-    if (!MAP.fitted && pos.some((a) => a.kind !== "none")) { MAP.fitted = true; fitMap("both"); }
+    if (MAP.ready) {
+      m.getSource("acc").setData({type:"FeatureCollection", features:acc});
+      m.getSource("trail").setData({type:"FeatureCollection", features:trails});
+    }
+    if (!MAP.fitted && pos.some((a) => a.kind !== "none")) { MAP.fitted = true; setTimeout(() => fitMap("both"), 60); }
   }
   const a = S.loc[0], b = S.loc[1];
   if (fresh(a, 45) && fresh(b, 45)) {
@@ -1226,7 +1292,7 @@ function drawMap() {
     $("#dist").hidden = false;
     $("#distTxt").textContent = NAMES[1 - S.me] + " is " + (d < 1000 ? Math.round(d / 10) * 10 + " m" : (d / 1000).toFixed(1) + " km") + " " + compass(br);
     $("#distSub").textContent = (d < 40 ? "Basically next to you" : "About " + Math.max(1, Math.round(d / 80)) + " min walk") + " · their GPS " + ago(them.ts);
-    $("#distArrow").style.transform = "rotate(" + br + "deg)";
+    $("#distArrow").style.transform = "rotate(" + (br - (MAP.m ? MAP.m.getBearing() : 0)) + "deg)";
   } else $("#dist").hidden = true;
   $("#mapNote").textContent = GEO.watch !== null ? "Page GPS on" : "Page GPS off";
 
@@ -1248,7 +1314,7 @@ function drawMap() {
     if (e.target.closest("a")) return;
     const at = where(+row.dataset.w);
     if (at.kind === "none" || !MAP.m) { toast("No location for " + NAMES[+row.dataset.w] + " yet"); return; }
-    openSheet(false); MAP.m.flyTo(at.ll, 16, {duration:.8});
+    openSheet(false); MAP.m.flyTo({center:at.ll, zoom:17, pitch:62, padding:camPad(), duration:900});
   });
   sizeSheet();
 
@@ -1337,23 +1403,25 @@ function openSheet(open) { const sh = $("#sheet"); sh.classList.toggle("open", o
   };
   grab.addEventListener("pointerup", end); grab.addEventListener("pointercancel", end);
 })();
-window.addEventListener("resize", () => { sizeSheet(); if (MAP.m) MAP.m.invalidateSize(); });
+window.addEventListener("resize", () => { sizeSheet(); if (MAP.m) MAP.m.resize(); });
 
 /* ---------- offline map: pre-cache the city-centre tiles (the service worker keeps them) ---------- */
-function tileList() {
-  const out = [];
+async function tileList() {
+  const tj = await (await fetch(OFM + "/planet")).json(), tpl = tj.tiles[0], out = [OFM + "/planet"];
   const x = (lon, z) => Math.floor((lon + 180) / 360 * 2 ** z);
   const y = (lat, z) => { const a = lat * Math.PI / 180; return Math.floor((1 - Math.log(Math.tan(a) + 1 / Math.cos(a)) / Math.PI) / 2 * 2 ** z); };
-  for (let z = 12; z <= 16; z++) {
-    for (let tx = x(-3.003, z); tx <= x(-2.969, z); tx++) for (let ty = y(53.412, z); ty <= y(53.392, z); ty++)
-      [TILE_URL, LABEL_URL].forEach((u) => out.push(u.replace("{z}", z).replace("{y}", ty).replace("{x}", tx)));
-  }
+  for (let z = 10; z <= 14; z++)
+    for (let tx = x(-3.005, z); tx <= x(-2.965, z); tx++) for (let ty = y(53.414, z); ty <= y(53.390, z); ty++)
+      out.push(tpl.replace("{z}", z).replace("{x}", tx).replace("{y}", ty));
+  ["Noto Sans Regular", "Noto Sans Bold", "Noto Sans Italic"].forEach((f) => out.push(OFM + "/fonts/" + encodeURIComponent(f) + "/0-255.pbf"));
   return out;
 }
 async function saveOffline() {
-  const btn = $("#saveMapBtn"), list = tileList();
+  const btn = $("#saveMapBtn");
   if (btn.dataset.busy) return;
   btn.dataset.busy = "1";
+  let list;
+  try { list = await tileList(); } catch (e) { delete btn.dataset.busy; toast("Needs signal to save the map"); return; }
   let done = 0, failed = 0, i = 0;
   const worker = async () => { while (i < list.length) { const u = list[i++]; try { const r = await fetch(u, {mode:"cors"}); if (!r.ok) failed++; } catch (e) { failed++; } btn.textContent = "Saving " + Math.round(++done / list.length * 100) + "%"; } };
   await Promise.all([worker(), worker(), worker(), worker(), worker(), worker()]);
@@ -1406,7 +1474,7 @@ function show(v) {
   document.body.classList.toggle("maplive", v === "map");
   window.scrollTo(0, 0);
   if (v === "night") drawChart();
-  if (v === "map") setTimeout(() => { if (initMap()) MAP.m.invalidateSize(); drawMap(); sizeSheet(); }, 40);
+  if (v === "map") setTimeout(() => { if (initMap()) MAP.m.resize(); drawMap(); sizeSheet(); }, 40);
 }
 document.querySelectorAll("nav.tabs button").forEach((b) => b.onclick = () => { show(b.dataset.go); buzz(6); });
 function guide(g) {

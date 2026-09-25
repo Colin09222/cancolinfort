@@ -1,14 +1,14 @@
 /* Bender HQ — offline cache.
    Point is simple: once it's loaded on the plane, it keeps working in a pub
    basement in Liverpool with no signal and no roaming data. */
-const CACHE = "bender-hq-v5";
-const TILES = "bender-hq-tiles-v1";
+const CACHE = "bender-hq-v6";
+const TILES = "bender-hq-tiles-v2";
 const FILES = ["./", "./index.html", "./manifest.webmanifest",
                "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png",
-               "./vendor/leaflet.js", "./vendor/leaflet.css", "./vendor/nacl-fast.min.js",
+               "./vendor/maplibre-gl.js", "./vendor/maplibre-gl.css", "./vendor/nacl-fast.min.js",
                "./fonts/barlow-400.woff2", "./fonts/barlow-500.woff2", "./fonts/barlow-600.woff2", "./fonts/barlow-700.woff2",
                "./fonts/barlow-condensed-500.woff2", "./fonts/barlow-condensed-600.woff2", "./fonts/barlow-condensed-700.woff2", "./fonts/barlow-condensed-800.woff2"];
-const MAX_TILES = 1500;
+const MAX_TILES = 2500;
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));
@@ -32,7 +32,7 @@ self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);
 
   /* Map tiles: cache-first, so any street you've looked at (or pre-saved) works with no signal. */
-  if (url.hostname === "server.arcgisonline.com") {
+  if (url.hostname === "tiles.openfreemap.org") {
     e.respondWith(caches.open(TILES).then(async (c) => {
       const hit = await c.match(e.request.url);
       if (hit) return hit;
