@@ -12,6 +12,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Bender HQ">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="vendor/leaflet.css">
 <link rel="icon" href="icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>Bender HQ — Liverpool</title>
@@ -160,30 +161,41 @@ summary:after{content:" ›";display:inline-block;transition:.2s}
 details[open] summary:after{transform:rotate(90deg)}
 
 /* ---------- map ---------- */
-.map{position:relative;width:100%;aspect-ratio:1/1;border-radius:16px;overflow:hidden;background:#0d131b;border:1px solid var(--line);touch-action:manipulation}
-.map svg.base{position:absolute;inset:0;width:100%;height:100%}
-.node{position:absolute;width:30px;height:30px;transform:translate(-50%,-50%);background:none;border:0;padding:0}
-.node .dot{position:absolute;left:50%;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:var(--s3);border:2px solid #4a5a70;transition:.25s}
-.node .nm{position:absolute;font-size:10px;font-weight:600;letter-spacing:.03em;color:var(--mute);white-space:nowrap;text-shadow:0 1px 4px #000,0 0 8px #0d131b;pointer-events:none}
-.node .nm.b{top:24px;left:50%;transform:translateX(-50%)}
-.node .nm.t{bottom:24px;left:50%;transform:translateX(-50%)}
-.node .nm.r{left:24px;top:50%;transform:translateY(-50%)}
-.node .nm.l{right:24px;top:50%;transform:translateY(-50%)}
-.node.day .dot{border-style:dashed}
-.node.hot .dot{background:var(--brass);border-color:#fff0cc;box-shadow:0 0 0 5px rgba(232,176,75,.18),0 0 18px rgba(232,176,75,.55)}
-.node.hot .nm{color:var(--ink)}
-.guy{position:absolute;width:26px;transform:translate(-50%,-92%);pointer-events:none;z-index:3;
-  transition:left 1s cubic-bezier(.4,1.3,.5,1),top 1s cubic-bezier(.4,1.3,.5,1),opacity .3s}
-.guy svg{display:block;width:100%;filter:drop-shadow(0 4px 6px rgba(0,0,0,.6))}
-.guy .tag{font-size:8.5px;font-weight:700;text-align:center;letter-spacing:.06em;text-transform:uppercase;text-shadow:0 1px 3px #000;white-space:nowrap;margin-left:-10px;margin-right:-10px}
-.guy .ring{position:absolute;left:50%;bottom:12px;width:30px;height:12px;margin-left:-15px;border-radius:50%;border:2px solid var(--pc);opacity:.0;animation:ping 2.2s ease-out infinite}
-.guy.gps .ring{opacity:1}
-@keyframes ping{0%{transform:scale(.4);opacity:.9}100%{transform:scale(1.8);opacity:0}}
-.guy.off{opacity:.35}
-@keyframes sway{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
-@keyframes wobble{0%,100%{transform:rotate(-15deg)}50%{transform:rotate(15deg) translateY(2px)}}
-.edge{position:absolute;z-index:4;font-size:9px;font-weight:700;padding:3px 7px;border-radius:99px;background:rgba(10,14,20,.85);border:1px solid var(--pc);color:var(--ink);transform:translate(-50%,-50%);white-space:nowrap;pointer-events:none}
-.map-foot{display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--faint)}
+.mapcard{position:relative;padding:0;overflow:hidden}
+.map{position:relative;width:100%;height:440px;background:#0b1017;z-index:0}
+.leaflet-container{background:#0b1017;font:inherit;-webkit-tap-highlight-color:transparent}
+.leaflet-tile-pane{filter:brightness(.62) contrast(1.12) sepia(.4) hue-rotate(178deg) saturate(1.5)}
+.leaflet-tile-pane .labels{filter:brightness(1.35)}
+.leaflet-tile-container img.leaflet-tile{width:256.5px!important;height:256.5px!important}
+.leaflet-control-attribution{background:rgba(10,14,20,.72)!important;color:#5d6879!important;font-size:9px!important;padding:1px 6px!important;border-radius:6px 0 0 0}
+.leaflet-control-attribution a{color:#8d99ab!important;text-decoration:none}
+.leaflet-bar{border:0!important;border-radius:12px!important;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.45)!important}
+.leaflet-bar a{width:36px!important;height:36px!important;line-height:36px!important;font-size:18px!important;background:rgba(22,30,42,.94)!important;color:var(--ink)!important;border-bottom:1px solid var(--line)!important}
+.leaflet-bar a:last-child{border-bottom:0!important}
+.leaflet-top.leaflet-right{margin-top:2px}
+.map-tools{position:absolute;left:12px;top:12px;z-index:500;display:flex;flex-direction:column;gap:8px}
+.map-tools button{display:flex;align-items:center;gap:6px;padding:8px 11px;border-radius:11px;border:1px solid var(--line2);background:rgba(22,30,42,.94);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);font-size:12px;font-weight:650;color:var(--ink);box-shadow:0 4px 14px rgba(0,0,0,.4)}
+.map-tools svg{width:15px;height:15px}
+.map-banner{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:500;padding:7px 12px;border-radius:99px;background:rgba(10,14,20,.92);border:1px solid var(--line2);font-size:11.5px;color:var(--mute);white-space:nowrap}
+.map-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 16px 12px;font-size:11.5px;color:var(--faint)}
+.map-foot button{background:none;border:0;padding:0;color:var(--brass);font-size:12px;font-weight:650}
+.mapcard .dist{margin:0 12px 12px}
+.pin{position:relative;width:44px;height:44px;cursor:pointer}
+.pin .av{position:absolute;inset:3px;border-radius:50%;background:linear-gradient(145deg,var(--pc),var(--pc2));border:3px solid #0b1017;box-shadow:0 0 0 2px var(--pc),0 6px 18px rgba(0,0,0,.6);display:grid;place-items:center;font-size:13px;font-weight:800;color:#10161f;letter-spacing:.01em}
+.pin .pulse{position:absolute;inset:0;border-radius:50%;border:2px solid var(--pc);opacity:0}
+.pin.live .pulse{animation:ping 2.2s ease-out infinite}
+.pin.stale .av{filter:saturate(.3) brightness(.75)}
+.pin.spot .av{box-shadow:0 0 0 2px var(--pc),0 0 0 5px rgba(11,16,23,.7),0 6px 18px rgba(0,0,0,.6)}
+.pin .lab{position:absolute;top:46px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:3px 8px;border-radius:99px;background:rgba(10,14,20,.9);border:1px solid var(--line2);font-size:11px;font-weight:650;color:var(--ink);box-shadow:0 3px 10px rgba(0,0,0,.4)}
+.pin .lab b{color:var(--pc);font-weight:750;margin-left:5px}
+@keyframes ping{0%{transform:scale(.75);opacity:.9}100%{transform:scale(1.9);opacity:0}}
+.spot{position:absolute;left:-7px;top:-7px;display:flex;align-items:center;gap:6px;white-space:nowrap;cursor:pointer}
+.spot i{width:14px;height:14px;border-radius:50%;background:#1d2735;border:2px solid #7a889c;flex:none;box-shadow:0 0 0 3px rgba(11,16,23,.55)}
+.spot span{font-size:11px;font-weight:650;color:#b3bdca;text-shadow:0 1px 3px #000,0 0 8px #0b1017,0 0 2px #0b1017}
+.spot.hot i{background:var(--brass);border-color:#fff0cc;box-shadow:0 0 0 4px rgba(232,176,75,.2),0 0 14px rgba(232,176,75,.5)}
+.spot.hot span{color:var(--ink)}
+.spot.day i{border-style:dashed}
+.spot.covered span{display:none}
 .dist{display:flex;align-items:center;gap:12px;margin-top:12px;padding:12px 14px;border-radius:14px;background:rgba(79,209,197,.06);border:1px solid rgba(79,209,197,.2)}
 .dist svg{width:30px;height:30px;flex:none;transition:transform .6s}
 .dist b{display:block;font-size:15px}
@@ -194,10 +206,21 @@ details[open] summary:after{transform:rotate(90deg)}
 .player .nm{display:flex;align-items:center;justify-content:space-between;font-weight:650;font-size:14px}
 .player .nm em{font-style:normal;font-size:10.5px;font-weight:600;letter-spacing:.08em;color:var(--pc);text-transform:uppercase}
 .player .loc{font-size:12.5px;color:var(--mute);margin-top:3px;min-height:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.player .gps{font-size:11px;color:var(--faint);margin-top:2px;min-height:16px}
+.player .gps{font-size:11px;color:var(--faint);margin-top:2px;min-height:32px;line-height:1.45}
+.player .pbac{font-size:12px;color:var(--mute);margin-top:6px}
+.player .pbac b{font-variant-numeric:tabular-nums;font-weight:700}
 .player a{display:inline-block;margin-top:6px;font-size:12px;font-weight:600;color:var(--brass);text-decoration:none}
-.hearts{display:flex;gap:3px;margin-top:8px}
-.hearts svg{width:15px;height:15px}
+.steps{list-style:none;margin:0;padding:0;counter-reset:st}
+.steps li{position:relative;display:flex;align-items:center;gap:12px;padding:11px 0 11px 38px;border-top:1px solid var(--line);counter-increment:st}
+.steps li:first-child{border-top:0;padding-top:4px}
+.steps li:before{content:counter(st);position:absolute;left:0;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;background:var(--s3);border:1px solid var(--line2);color:var(--brass)}
+.steps li:first-child:before{margin-top:-3px}
+.steps li > div{flex:1;min-width:0}
+.steps b{display:block;font-size:14px}
+.steps small{display:block;font-size:12px;color:var(--mute);margin-top:1px}
+.btn-s{flex:none;display:inline-flex;align-items:center;padding:8px 13px;border-radius:10px;border:1px solid var(--line2);background:var(--s3);color:var(--ink);font-size:12.5px;font-weight:650;text-decoration:none;white-space:nowrap}
+.btn-s.pri{background:var(--brass);border-color:var(--brass);color:var(--brass-ink)}
+.btn-s.dis{opacity:.35;pointer-events:none}
 .chips{display:flex;flex-wrap:wrap;gap:7px}
 .chips button{background:var(--s2);border:1px solid var(--line);color:var(--mute);border-radius:999px;padding:8px 13px;font-size:12.5px;font-weight:500;transition:.15s}
 .chips button.on{background:var(--brass);border-color:var(--brass);color:var(--brass-ink);font-weight:650}
@@ -395,46 +418,19 @@ nav.tabs button.on{color:var(--brass)}
   <div class="head">
     <div class="eyebrow">Live map</div>
     <h1>Where's everyone?</h1>
-    <p>Share live GPS, or tap a spot to check in. Hearts drain as the night goes on.</p>
+    <p>Live positions from both phones. Tap a venue to check in.</p>
   </div>
 
   <div class="seg" id="mePick"><button data-me="0">I'm Colin</button><button data-me="1">I'm Cailyn</button></div>
 
-  <div class="card" style="padding:12px">
-    <div class="seg mini" id="zoomSeg" style="margin:0 0 10px"><button data-z="city">City centre</button><button data-z="rope">Ropewalks close-up</button></div>
-    <div class="map" id="map">
-      <svg class="base" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        <defs>
-          <pattern id="grid" width="6" height="6" patternUnits="userSpaceOnUse"><path d="M6 0H0V6" fill="none" stroke="rgba(255,255,255,.022)" stroke-width=".3"/></pattern>
-          <linearGradient id="water" x1="0" x2="1"><stop offset="0" stop-color="#0c2233"/><stop offset="1" stop-color="#10293d"/></linearGradient>
-        </defs>
-        <rect width="100" height="100" fill="url(#grid)"/>
-        <g id="mapG" style="transition:transform .45s cubic-bezier(.3,.8,.3,1)">
-          <path d="M-100 -100H12C10.5 20 14.5 36 13 52C11.5 68 15 84 13 200H-100Z" fill="url(#water)"/>
-          <path d="M12 -100V0C10.5 20 14.5 36 13 52C11.5 68 15 84 13 100V200" fill="none" stroke="#1d4460" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
-          <g fill="#141d29" stroke="#223043" stroke-width="1" vector-effect="non-scaling-stroke">
-            <rect x="15" y="58" width="10" height="4.5" rx=".6"/><rect x="15" y="64.5" width="10" height="4.5" rx=".6"/>
-            <rect x="14.5" y="72" width="7" height="6" rx=".6"/><rect x="14" y="28" width="5" height="12" rx=".6"/>
-          </g>
-          <g fill="none" stroke="rgba(255,255,255,.075)" stroke-width="2.6" stroke-linecap="round" vector-effect="non-scaling-stroke">
-            <path d="M32 0V100" vector-effect="non-scaling-stroke"/><path d="M59.6 36.9L84.6 51.2" vector-effect="non-scaling-stroke"/><path d="M55.4 50L80.4 59.4" vector-effect="non-scaling-stroke"/>
-            <path d="M84.5 16V64" vector-effect="non-scaling-stroke"/><path d="M36 33H72" vector-effect="non-scaling-stroke"/><path d="M38 58.8H76" vector-effect="non-scaling-stroke"/>
-            <path d="M22 88H98" vector-effect="non-scaling-stroke"/><path d="M80 6V26" vector-effect="non-scaling-stroke"/><path d="M52 30L60 64" vector-effect="non-scaling-stroke"/>
-            <path d="M60 64L66 100" vector-effect="non-scaling-stroke"/>
-          </g>
-          <polyline id="routeLine" fill="none" stroke="#e8b04b" stroke-opacity=".34" stroke-width="2.2" stroke-dasharray="7 6" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
-          <rect x="76.8" y="17.4" width="6.4" height="4" rx=".8" fill="#1d2735" stroke="#344459" stroke-width="1" vector-effect="non-scaling-stroke"/>
-          <text x="80" y="15.6" font-size="2.6" fill="#5d6879" text-anchor="middle" font-family="-apple-system,sans-serif" font-weight="600">LIME ST</text>
-          <text x="6" y="40" font-size="2.8" fill="#2c5878" font-family="-apple-system,sans-serif" font-weight="600" letter-spacing=".6" transform="rotate(-90 6 40)" text-anchor="middle">RIVER MERSEY</text>
-        </g>
-        <g transform="translate(92,92)" font-family="-apple-system,sans-serif">
-          <circle r="4.2" fill="#10161f" stroke="#2a3748" stroke-width=".35"/>
-          <path d="M0 -3 L1.3 .8 L0 0 L-1.3 .8Z" fill="#e8b04b"/>
-          <text y="3.2" font-size="2.2" fill="#8d99ab" text-anchor="middle" font-weight="700">N</text>
-        </g>
-      </svg>
+  <div class="card mapcard">
+    <div class="map" id="lmap" aria-label="Map of Liverpool city centre"></div>
+    <div class="map-tools">
+      <button id="fitBtn" aria-label="Show both of us"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>Both</button>
+      <button id="meBtn" aria-label="Centre on me"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/></svg>Me</button>
     </div>
-    <div class="map-foot"><span>North up · city centre, ~1.8 km across</span><span id="mapNote">GPS off</span></div>
+    <div class="map-banner" id="mapBanner" hidden>No signal · showing saved map</div>
+    <div class="map-foot"><span id="mapNote">Your GPS: off</span><button id="saveMapBtn">Save map for offline</button></div>
     <div class="dist" id="dist" hidden>
       <svg viewBox="0 0 24 24" id="distArrow" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="none" stroke="rgba(79,209,197,.35)"/><path d="M12 4l4.5 13L12 14l-4.5 3z" fill="#4fd1c5"/></svg>
       <div><b id="distTxt">—</b><small id="distSub">—</small></div>
@@ -444,22 +440,30 @@ nav.tabs button.on{color:var(--brass)}
   <div class="players" id="players"></div>
 
   <div class="card" style="margin-top:14px">
+    <div class="card-h"><h2>Background GPS</h2><span>Phone locked · recommended</span></div>
+    <p class="lede">Keeps your pin moving with the phone in your pocket, using <b>OwnTracks</b> — a free, open-source iPhone app. Encrypted with your crew code; nobody else can read it.</p>
+    <ol class="steps">
+      <li><div><b>Install OwnTracks</b><small>Free on the App Store</small></div><a class="btn-s" href="https://apps.apple.com/us/app/owntracks/id692424691" target="_blank" rel="noopener">App Store</a></li>
+      <li><div><b>Connect it to Bender HQ</b><small>Opens OwnTracks and sets everything up</small></div><a class="btn-s pri" id="otLink" href="#">Connect</a></li>
+      <li><div><b>Turn on encryption</b><small>OwnTracks › Settings › Encryption key — paste</small></div><button class="btn-s" id="otKey">Copy key</button></li>
+      <li><div><b>Allow location "Always"</b><small>When iOS asks — or Settings › OwnTracks › Location</small></div></li>
+    </ol>
+    <div class="geo-stat" id="otStat"><i></i><span id="otTxt">—</span></div>
+  </div>
+
+  <div class="card">
     <div class="switch">
-      <div class="txt"><b>Share my live location</b><small id="shareSub">Only with your crew. Encrypted.</small></div>
-      <button class="tg" id="shareTg" role="switch" aria-checked="false" aria-label="Share my live location"></button>
+      <div class="txt"><b>Share from this page</b><small id="shareSub">While this page is open. Encrypted.</small></div>
+      <button class="tg" id="shareTg" role="switch" aria-checked="false" aria-label="Share my live location from this page"></button>
     </div>
     <div class="geo-stat" id="geoStat"><i></i><span id="geoTxt">Location sharing is off</span></div>
     <div class="divider"></div>
     <div class="switch">
-      <div class="txt"><b>Keep screen awake</b><small>Stops the phone locking while you share.</small></div>
+      <div class="txt"><b>Keep screen awake</b><small>Stops the phone locking while this page shares.</small></div>
       <button class="tg" id="wakeTg" role="switch" aria-checked="true" aria-label="Keep screen awake while sharing"></button>
     </div>
-    <details>
-      <summary>How GPS works on iPhone</summary>
-      <p class="lede" style="margin:10px 0 0">iPhone only lets a web app read GPS while it's open on screen, so position updates while Bender HQ is open and pauses when you lock the phone or switch apps — your last spot stays on the map with a timestamp. For always-on tracking in the background, also turn on <b>Find My → Share My Location</b> with each other. Updates send every ~2 min while moving and every 15 min when parked, to go easy on battery.</p>
-    </details>
+    <p class="lede" style="margin:12px 0 0;font-size:12.5px">Quick option with no app install. iPhone only allows it while Bender HQ is open on screen — use OwnTracks above for pocket tracking. Both can run at once; the newest fix wins.</p>
   </div>
-
   <div class="card">
     <div class="card-h"><h2>Check in</h2><span id="actWho">as Colin</span></div>
     <p class="lede">No GPS? Tap a spot on the map, then say what you're up to.</p>
@@ -657,6 +661,8 @@ nav.tabs button.on{color:var(--brass)}
   </div>
 </nav>
 
+<script src="vendor/leaflet.js"></script>
+<script src="vendor/nacl-fast.min.js"></script>
 <script>
 "use strict";
 const $ = (s) => document.querySelector(s);
@@ -694,18 +700,19 @@ function cleanPerson(o, i) {
 }
 function cleanLoc(o) {
   if (!o || !isFinite(o.lat) || !isFinite(o.lon)) return null;
-  return {lat:+o.lat, lon:+o.lon, acc:+o.acc || 0, ts:+o.ts || 0};
+  return {lat:+o.lat, lon:+o.lon, acc:+o.acc || 0, ts:+o.ts || 0, src:o.src === "ot" ? "ot" : "app", batt:isFinite(o.batt) && o.batt !== null ? +o.batt : null};
 }
 function migrate(o) {
   const s = {v:3, people:[blankPerson(0), blankPerson(1)], loc:[null, null], me:0, crew:"", share:false, wake:true,
-             rate:1.27, rateSet:false, addr:"", notes:"", pend:[]};
+             rate:1.27, rateSet:false, addr:"", notes:"", pend:[], trail:[[], []]};
   if (!o || typeof o !== "object") return s;
   s.addr = String(o.addr || ""); s.notes = String(o.notes || ""); s.rate = +o.rate > 0 ? +o.rate : 1.27; s.rateSet = !!o.rateSet;
   s.me = o.me === 1 ? 1 : 0;
   if (o.v === 3) {
     s.people = [cleanPerson(o.people && o.people[0], 0), cleanPerson(o.people && o.people[1], 1)];
     s.loc = [cleanLoc(o.loc && o.loc[0]), cleanLoc(o.loc && o.loc[1])];
-    s.crew = String(o.crew || ""); s.share = !!o.share; s.wake = o.wake !== false; s.zoom = o.zoom === "rope" ? "rope" : "city";
+    s.crew = String(o.crew || ""); s.share = !!o.share; s.wake = o.wake !== false; s.mapSaved = +o.mapSaved || 0;
+    s.trail = [0, 1].map((i) => Array.isArray(o.trail && o.trail[i]) ? o.trail[i].filter((t) => Array.isArray(t) && t.length === 3 && t.every(isFinite)) : []);
     s.pend = Array.isArray(o.pend) ? o.pend.filter((w) => w === 0 || w === 1) : [];
     return s;
   }
@@ -807,6 +814,14 @@ function setSync(st) { SYNC.status = st; drawSync(); }
 async function handleMsg(m) {
   if (!m || m.event !== "message" || typeof m.message !== "string") return;
   SYNC.lastId = m.id;
+  const raw = m.message.trim();
+  if (raw[0] === "{") {                       /* OwnTracks: {"_type":"encrypted"|"location",…} */
+    let j = null;
+    try { j = JSON.parse(raw); } catch (e) { return; }
+    if (j && j._type === "encrypted") j = otOpen(j.data);
+    if (j && j._type === "location") applyOT(j);
+    return;
+  }
   const o = await unseal(m.message);
   if (!o || o.v !== 3 || (o.who !== 0 && o.who !== 1)) return;
   if (o.t === "person") {
@@ -818,7 +833,7 @@ async function handleMsg(m) {
     }
   } else if (o.t === "loc") {
     const L = cleanLoc(o);
-    if (L && o.who !== S.me && (!S.loc[o.who] || L.ts > S.loc[o.who].ts)) { S.loc[o.who] = L; save(); scheduleDraw(); }
+    if (L) setLoc(o.who, L);
   }
 }
 async function pullBacklog() {
@@ -928,7 +943,7 @@ function startShare() {
     if (e.code === 1) { S.share = false; save(); stopShare(); }
     drawGeo();
   }, {enableHighAccuracy:true, maximumAge:10000, timeout:30000});
-  GEO.beat = setInterval(() => { const L = S.loc[S.me]; if (L) maybeSendLoc(L, true); }, 60e3);
+  GEO.beat = setInterval(() => { const L = S.loc[S.me]; if (L && L.src === "app") maybeSendLoc(L, true); }, 60e3);
   acquireWake(); drawGeo();
 }
 function stopShare() {
@@ -936,8 +951,8 @@ function stopShare() {
   GEO.watch = null; clearInterval(GEO.beat); releaseWake(); drawGeo();
 }
 function onPos(pos) {
-  const L = {lat:pos.coords.latitude, lon:pos.coords.longitude, acc:pos.coords.accuracy || 0, ts:Date.now()};
-  S.loc[S.me] = L; save(); GEO.err = "";
+  const L = {lat:pos.coords.latitude, lon:pos.coords.longitude, acc:pos.coords.accuracy || 0, ts:Date.now(), src:"app", batt:null};
+  setLoc(S.me, L); GEO.err = "";
   maybeSendLoc(L, false);
   drawMap(); drawGeo();
 }
@@ -948,7 +963,7 @@ function maybeSendLoc(L, heartbeat) {
   const moved = last ? haversine(last, L) : Infinity;
   const due = !last || (moved >= 30 && now - last.sentAt >= minGap) || now - last.sentAt >= 15 * 60e3;
   if (!due || (heartbeat && now - L.ts > 5 * 60e3)) return;
-  const out = {lat:+L.lat.toFixed(6), lon:+L.lon.toFixed(6), acc:Math.round(L.acc), ts:heartbeat ? now : L.ts};
+  const out = {lat:+L.lat.toFixed(6), lon:+L.lon.toFixed(6), acc:Math.round(L.acc), ts:heartbeat ? now : L.ts, src:"app"};
   send(Object.assign({v:3, t:"loc", who:S.me}, out)).then((ok) => { if (ok) { GEO.lastSent = Object.assign({sentAt:now}, out); drawGeo(); } });
 }
 async function acquireWake() {
@@ -1012,7 +1027,7 @@ function drawToday() {
     {t:"Hotel address saved",            ok:!!S.addr.trim(), go:"home"},
     {t:"Both weights set for BAC",       ok:parseFloat(S.people[0].w) > 50 && parseFloat(S.people[1].w) > 50, go:"night"},
     {t:"Joined the crew (live sync)",    ok:!!S.crew, go:"crew"},
-    {t:"Location sharing tested",        ok:!!S.loc[S.me], go:"map"},
+    {t:"Background GPS set up",          ok:!!(S.loc[S.me] && S.loc[S.me].src === "ot"), go:"map"},
     {t:"Exchange rate checked",          ok:!!S.rateSet, go:"guide", g:"money"},
     {t:"Added to Home Screen",           ok:stand, go:null}
   ];
@@ -1152,92 +1167,113 @@ function drawChart() {
   hit.addEventListener("touchmove", move, {passive:true}); hit.addEventListener("touchend", () => setTimeout(hide, 1500));
 }
 
-/* ---------- map ---------- */
-/* projection: lon -3.000…-2.972, lat 53.3945…53.4105 (≈1.8 km square) */
-const BBOX = {w:-3.000, e:-2.972, s:53.3945, n:53.4105};
-const proj = (lat, lon) => ({x:(lon - BBOX.w) / (BBOX.e - BBOX.w) * 100, y:(BBOX.n - lat) / (BBOX.n - BBOX.s) * 100});
+/* ---------- map: Leaflet + CARTO dark tiles, avatar pins, accuracy rings, 3-hour trails ---------- */
 /* indices 0-4 match v1/v2 so saved check-ins survive; 5 is Albert Dock */
 const SPOTS = [
-  {n:"Concert Sq", lat:53.4028, lon:-2.9814, lab:"l"}, {n:"Seel St", lat:53.4018, lon:-2.9810, lab:"r"},
-  {n:"Bold St", lat:53.4035, lon:-2.9798, lab:"r"},    {n:"Baltic", lat:53.3968, lon:-2.9818, lab:"b"},
-  {n:"Mathew St", lat:53.4062, lon:-2.9875, lab:"b"}, {n:"Albert Dock", lat:53.4003, lon:-2.9923, lab:"b", day:true}
-].map((s) => Object.assign(s, proj(s.lat, s.lon)));
-$("#routeLine").setAttribute("points", [0, 1, 2, 3, 4].map((i) => SPOTS[i].x.toFixed(1) + "," + SPOTS[i].y.toFixed(1)).join(" "));
-/* two scales: whole centre, or a close-up of Ropewalks where Concert Sq / Seel St / Bold St sit ~100 m apart */
-const VIEWS = {city:{k:1, cx:50, cy:50}, rope:{k:2.3, cx:65, cy:48}};
-const view = () => VIEWS[S.zoom] || VIEWS.city;
-const zp = (pt) => { const v = view(); return {x:(pt.x - v.cx) * v.k + 50, y:(pt.y - v.cy) * v.k + 50}; };
-const inView = (p) => p.x >= 2 && p.x <= 98 && p.y >= 2 && p.y <= 98;
-
-function guySVG(color, drunk) {
-  const anim = drunk >= 4 ? "wobble 1.1s ease-in-out infinite" : drunk >= 2 ? "sway 2s ease-in-out infinite" : "none";
-  const eye = drunk >= 4 ? '<path d="M12 19l5 4M17 19l-5 4M23 19l5 4M28 19l-5 4" stroke="#111" stroke-width="1.6" stroke-linecap="round"/>'
-                         : '<circle cx="15" cy="21" r="2.1" fill="#111"/><circle cx="25" cy="21" r="2.1" fill="#111"/>';
-  const mouth = drunk >= 3 ? '<path d="M15 28q5 5 10 0" stroke="#111" stroke-width="1.5" fill="none" stroke-linecap="round"/>'
-                           : '<path d="M16 27q4 3 8 0" stroke="#111" stroke-width="1.5" fill="none" stroke-linecap="round"/>';
-  return '<svg viewBox="0 0 40 58" style="animation:' + anim + ';transform-origin:50% 100%"><ellipse cx="20" cy="55" rx="11" ry="2.6" fill="#0007"/>' +
-    '<rect x="11" y="33" width="18" height="20" rx="7" fill="' + color + '"/><circle cx="20" cy="20" r="13" fill="#f3d9b8"/>' +
-    '<path d="M7 16a13 13 0 0 1 26 0z" fill="' + color + '"/>' + eye + mouth + '</svg>';
-}
-function drunkLevel(w) { const b = bacNow(w); return !b ? 0 : Math.min(5, Math.floor(b / 0.04) + 1); }
-const HEART = "M12 20.5s-7.3-4.5-9.3-9.1C1.3 7.9 3.5 4.5 7 4.5c2 0 3.6 1.1 5 2.8 1.4-1.7 3-2.8 5-2.8 3.5 0 5.7 3.4 4.3 6.9-2 4.6-9.3 9.1-9.3 9.1z";
-function hearts(w) {
-  const left = 5 - drunkLevel(w); let h = "";
-  for (let i = 0; i < 5; i++) h += i < left ? '<svg viewBox="0 0 24 24"><path d="' + HEART + '" fill="#f06a6a"/></svg>'
-                                            : '<svg viewBox="0 0 24 24"><path d="' + HEART + '" fill="none" stroke="#3a4657" stroke-width="1.8"/></svg>';
-  return h;
-}
+  {n:"Concert Sq", lat:53.4028, lon:-2.9814}, {n:"Seel St", lat:53.4018, lon:-2.9810},
+  {n:"Bold St", lat:53.4035, lon:-2.9798},    {n:"Baltic Triangle", lat:53.3968, lon:-2.9818},
+  {n:"Mathew St", lat:53.4062, lon:-2.9875}, {n:"Albert Dock", lat:53.4003, lon:-2.9923, day:true}
+];
+const CENTRE = [53.4020, -2.9840];
+const PIN_C2 = ["#c98f2c", "#2aa89c"], INIT = ["Co", "Ca"];
+/* Esri World Dark Gray Canvas: free, no key, CORS-enabled; native detail to z16 (upscaled beyond) */
+const ESRI = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/";
+const TILE_URL = ESRI + "World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", LABEL_URL = ESRI + "World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}";
+const MAP = {m:null, pins:[null, null], acc:[null, null], trail:[null, null], spots:[], spotKey:[], pinKey:["", ""], fitted:false, tileErr:0};
 const fresh = (L, mins) => L && Date.now() - L.ts < mins * 60e3;
 function where(w) {
   const L = S.loc[w], p = S.people[w];
-  if (fresh(L, 45)) return {kind:"gps", pt:proj(L.lat, L.lon)};
-  if (p.spot !== null && SPOTS[p.spot]) return {kind:"spot", pt:SPOTS[p.spot]};
+  if (fresh(L, 45)) return {kind:"gps", ll:[L.lat, L.lon]};
+  if (p.spot !== null && SPOTS[p.spot]) return {kind:"spot", ll:[SPOTS[p.spot].lat, SPOTS[p.spot].lon]};
   return {kind:"none"};
 }
-function drawMap() {
-  const map = $("#map"), v = view();
-  map.querySelectorAll(".node,.guy,.edge").forEach((n) => n.remove());
-  $("#mapG").style.transform = "translate(50px,50px) scale(" + v.k + ") translate(" + (-v.cx) + "px," + (-v.cy) + "px)";
-  document.querySelectorAll("#zoomSeg button").forEach((b) => b.classList.toggle("on", b.dataset.z === (S.zoom === "rope" ? "rope" : "city")));
+function spotIcon(s, hot, covered) {
+  return L.divIcon({className:"", iconSize:[0, 0], html:'<div class="spot' + (hot ? " hot" : "") + (s.day ? " day" : "") + (covered ? " covered" : "") + '"><i></i><span>' + s.n + "</span></div>"});
+}
+function pinState(w, kind) {
+  if (kind === "spot") return " spot";
+  if (kind !== "gps") return "";
+  return fresh(S.loc[w], 3) ? " live" : fresh(S.loc[w], 15) ? "" : " stale";
+}
+function pinIcon(w, kind) {
+  const b = bacNow(w);
+  return L.divIcon({className:"", iconSize:[44, 44], iconAnchor:[22, 22],
+    html:'<div class="pin' + pinState(w, kind) + '" style="--pc:' + UI_C[w] + ";--pc2:" + PIN_C2[w] + '"><span class="pulse"></span><div class="av">' + INIT[w] + "</div>" +
+         '<div class="lab">' + NAMES[w] + (b ? "<b>" + b.toFixed(2).replace(/^0/, "") + "</b>" : "") + "</div></div>"});
+}
+function initMap() {
+  if (MAP.m) return true;
+  if (!window.L || !$("#lmap").offsetWidth) return false;
+  const m = L.map("lmap", {zoomControl:false, center:CENTRE, zoom:15, minZoom:12, maxZoom:19});
+  m.attributionControl.setPrefix(false);
+  L.control.zoom({position:"topright"}).addTo(m);
+  const tiles = L.tileLayer(TILE_URL, {maxNativeZoom:16, maxZoom:19, crossOrigin:true,
+    attribution:'Esri, HERE, Garmin, © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}).addTo(m);
+  L.tileLayer(LABEL_URL, {maxNativeZoom:16, maxZoom:19, crossOrigin:true, className:"labels"}).addTo(m);
+  tiles.on("tileerror", () => { if (++MAP.tileErr > 2) $("#mapBanner").hidden = false; });
+  tiles.on("tileload", () => { if (MAP.tileErr) { MAP.tileErr = 0; $("#mapBanner").hidden = true; } });
+  L.polyline([0, 1, 2, 3, 4].map((i) => [SPOTS[i].lat, SPOTS[i].lon]), {color:"#e8b04b", weight:2, opacity:.3, dashArray:"6 8", interactive:false}).addTo(m);
   SPOTS.forEach((s, i) => {
-    const q = zp(s);
-    if (!inView(q)) return;
-    const b = document.createElement("button");
-    b.className = "node" + (s.day ? " day" : "") + ((S.people[0].spot === i || S.people[1].spot === i) ? " hot" : "");
-    b.style.left = q.x + "%"; b.style.top = q.y + "%";
-    b.setAttribute("aria-label", "Check in at " + s.n);
-    b.innerHTML = '<span class="dot"></span><span class="nm ' + s.lab + '">' + s.n + '</span>';
-    b.onclick = () => { S.people[S.me].spot = i; queuePerson(S.me, true); buzz(15); toast("Checked in at " + s.n); drawAll(); };
-    map.appendChild(b);
+    const mk = L.marker([s.lat, s.lon], {icon:spotIcon(s, false), keyboard:false, title:"Check in at " + s.n}).addTo(m);
+    mk.on("click", () => { S.people[S.me].spot = i; queuePerson(S.me, true); buzz(15); toast("Checked in at " + s.n); drawAll(); });
+    MAP.spots.push(mk); MAP.spotKey.push(false);
   });
-  const pos = [0, 1].map(where);
-  pos.forEach((at) => { if (at.kind !== "none") at.q = zp(at.pt); });
   [0, 1].forEach((w) => {
-    const g = document.createElement("div"), at = pos[w];
-    g.className = "guy" + (at.kind === "gps" ? " gps" : "") + (at.kind === "none" ? " off" : "");
-    g.style.setProperty("--pc", UI_C[w]);
-    let x, y;
-    if (at.kind === "none") { x = w ? 36 : 25; y = 97; }
-    else {
-      x = at.q.x; y = at.q.y;
-      const other = pos[1 - w];
-      if (other.kind !== "none" && Math.hypot(other.q.x - x, other.q.y - y) < 7) x += w ? 4 : -4;
-      if (at.kind === "spot") y -= 1;
-    }
-    const cx = Math.max(4, Math.min(96, x)), cy = Math.max(9, Math.min(97, y));
-    if (at.kind !== "none" && (cx !== x || cy !== y)) {
-      const e = document.createElement("div");
-      e.className = "edge"; e.style.setProperty("--pc", UI_C[w]);
-      e.style.left = Math.max(14, Math.min(86, x)) + "%"; e.style.top = Math.max(5, Math.min(95, y)) + "%";
-      e.textContent = NAMES[w] + " · " + (S.zoom === "rope" ? "outside close-up"
-        : "off map" + (S.loc[w] ? ", " + (Math.round(haversine(S.loc[w], {lat:53.4025, lon:-2.9830}) / 100) / 10) + " km" : ""));
-      map.appendChild(e);
-    } else {
-      g.style.left = cx + "%"; g.style.top = cy + "%";
-      g.innerHTML = '<span class="ring"></span>' + guySVG(UI_C[w], drunkLevel(w)) + '<div class="tag" style="color:' + UI_C[w] + '">' + NAMES[w] + '</div>';
-      map.appendChild(g);
-    }
+    MAP.trail[w] = L.polyline([], {color:UI_C[w], weight:3, opacity:.5, lineCap:"round", lineJoin:"round", interactive:false}).addTo(m);
+    MAP.acc[w] = L.circle(CENTRE, {radius:1, color:UI_C[w], weight:1, opacity:.45, fillColor:UI_C[w], fillOpacity:.07, interactive:false});
+    MAP.pins[w] = L.marker(CENTRE, {icon:pinIcon(w, "none"), zIndexOffset:1000 + w, keyboard:false});
+    MAP.pins[w].on("click", () => { const at = where(w); if (at.kind !== "none") m.setView(at.ll, Math.max(m.getZoom(), 16)); });
   });
+  MAP.m = m;
+  return true;
+}
+function fitMap(which) {
+  if (!MAP.m) return;
+  const pts = (which === "me" ? [S.me] : [0, 1]).map(where).filter((a) => a.kind !== "none").map((a) => a.ll);
+  if (!pts.length) { MAP.m.setView(CENTRE, 15); if (which === "me") toast("No location yet — turn on sharing below"); return; }
+  if (pts.length === 1) MAP.m.setView(pts[0], 16);
+  else MAP.m.fitBounds(L.latLngBounds(pts).pad(0.4), {maxZoom:16});
+}
+/* one continuous trail per person: skip jitter (<15 m within a minute), keep 3 h, max 400 points */
+function addTrail(w, L0) {
+  const t = S.trail[w] || (S.trail[w] = []);
+  if (t.some((x) => x[2] === L0.ts)) return;
+  const last = t[t.length - 1];
+  if (last && L0.ts > last[2] && L0.ts - last[2] < 60e3 && haversine({lat:last[0], lon:last[1]}, L0) < 15) return;
+  t.push([+L0.lat.toFixed(6), +L0.lon.toFixed(6), L0.ts]);
+  t.sort((a, b) => a[2] - b[2]);
+  const cut = Date.now() - 3 * 36e5;
+  while (t.length && (t[0][2] < cut || t.length > 400)) t.shift();
+}
+function setLoc(w, L0) {
+  addTrail(w, L0);
+  if (!S.loc[w] || L0.ts > S.loc[w].ts) { S.loc[w] = L0; save(); scheduleDraw(); }
+}
+function drawMap() {
+  const pos = [0, 1].map(where);
+  if (initMap()) {
+    SPOTS.forEach((s, i) => {
+      const hot = S.people[0].spot === i || S.people[1].spot === i;
+      const covered = pos.some((a) => a.kind !== "none" && haversine({lat:a.ll[0], lon:a.ll[1]}, s) < 45);
+      const key = hot + "|" + covered;
+      if (MAP.spotKey[i] !== key) { MAP.spotKey[i] = key; MAP.spots[i].setIcon(spotIcon(s, hot, covered)); }
+    });
+    const cut = Date.now() - 3 * 36e5;
+    [0, 1].forEach((w) => {
+      const at = pos[w], pin = MAP.pins[w], acc = MAP.acc[w], L0 = S.loc[w];
+      if (at.kind === "none") { pin.remove(); acc.remove(); MAP.pinKey[w] = ""; }
+      else {
+        const b = bacNow(w), key = at.kind + pinState(w, at.kind) + (b ? b.toFixed(2) : "");
+        pin.setLatLng(at.ll);
+        if (MAP.pinKey[w] !== key) { MAP.pinKey[w] = key; pin.setIcon(pinIcon(w, at.kind)); }
+        if (!MAP.m.hasLayer(pin)) pin.addTo(MAP.m);
+        if (at.kind === "gps" && L0.acc > 10) { acc.setLatLng(at.ll).setRadius(Math.min(L0.acc, 400)); if (!MAP.m.hasLayer(acc)) acc.addTo(MAP.m); }
+        else acc.remove();
+      }
+      MAP.trail[w].setLatLngs((S.trail[w] || []).filter((t) => t[2] >= cut).map((t) => [t[0], t[1]]));
+    });
+    if (!MAP.fitted && pos.some((a) => a.kind !== "none")) { MAP.fitted = true; fitMap("both"); }
+  }
   const a = S.loc[0], b = S.loc[1];
   if (fresh(a, 45) && fresh(b, 45)) {
     const me = S.loc[S.me], them = S.loc[1 - S.me], d = haversine(me, them), br = bearing(me, them);
@@ -1246,25 +1282,26 @@ function drawMap() {
     $("#distSub").textContent = (d < 40 ? "Basically next to you" : "About " + Math.max(1, Math.round(d / 80)) + " min walk") + " · their GPS " + ago(them.ts);
     $("#distArrow").style.transform = "rotate(" + br + "deg)";
   } else $("#dist").hidden = true;
-  $("#mapNote").textContent = GEO.watch !== null ? "GPS on" : "GPS off";
+  $("#mapNote").textContent = GEO.watch !== null ? "Your GPS: on" : "Your GPS: off";
 
   $("#players").innerHTML = [0, 1].map((w) => {
-    const p = S.people[w], L = S.loc[w], at = pos[w];
-    const loc = at.kind === "gps" ? "Live GPS" + (p.act ? " · " + p.act : "") : at.kind === "spot" ? SPOTS[p.spot].n + (p.act ? " · " + p.act : "") : (p.act || "Not checked in");
-    const gps = L ? "GPS " + ago(L.ts) + (L.acc ? " · ±" + Math.round(L.acc) + " m" : "") : "No GPS yet";
-    const maps = L ? '<a href="https://maps.apple.com/?ll=' + L.lat.toFixed(6) + "," + L.lon.toFixed(6) + "&q=" + encodeURIComponent(NAMES[w]) + '" target="_blank" rel="noopener">Open in Maps ›</a>' : "";
-    return '<div class="player" style="--pc:' + CSSC[w] + '"><div class="nm">' + NAMES[w] + (S.me === w ? "<em>You</em>" : "") + '</div>' +
-      '<div class="loc">' + esc(loc) + '</div><div class="gps">' + gps + '</div><div class="hearts">' + hearts(w) + '</div>' + maps + '</div>';
+    const p = S.people[w], L0 = S.loc[w], at = pos[w], bac = bacNow(w);
+    const loc = at.kind === "gps" ? "Live location" + (p.act ? " · " + p.act : "") : at.kind === "spot" ? SPOTS[p.spot].n + (p.act ? " · " + p.act : "") : (p.act || "Not checked in");
+    const gps = L0 ? ago(L0.ts) + (L0.acc ? " · ±" + Math.round(L0.acc) + " m" : "") + (L0.src === "ot" ? " · background" : "") + (L0.batt != null ? " · " + Math.round(L0.batt) + "% battery" : "") : "No GPS yet";
+    const maps = L0 ? '<a href="https://maps.apple.com/?ll=' + L0.lat.toFixed(6) + "," + L0.lon.toFixed(6) + "&q=" + encodeURIComponent(NAMES[w]) + '" target="_blank" rel="noopener">Open in Maps ›</a>' : "";
+    return '<div class="player" style="--pc:' + CSSC[w] + '"><div class="nm">' + NAMES[w] + (S.me === w ? "<em>You</em>" : "") + "</div>" +
+      '<div class="loc">' + esc(loc) + '</div><div class="gps">' + gps + "</div>" +
+      '<div class="pbac">BAC <b style="color:' + bacColor(bac) + '">' + (bac === null ? "—" : bac.toFixed(3)) + "</b></div>" + maps + "</div>";
   }).join("");
 
   $("#actWho").textContent = "as " + NAMES[S.me];
   const chips = $("#acts"); chips.innerHTML = "";
   ACTS.forEach((act) => {
-    const b = document.createElement("button");
-    b.textContent = act;
-    if (S.people[S.me].act === act) b.className = "on";
-    b.onclick = () => { const p = S.people[S.me]; p.act = p.act === act ? "" : act; queuePerson(S.me, true); buzz(); drawAll(); };
-    chips.appendChild(b);
+    const btn = document.createElement("button");
+    btn.textContent = act;
+    if (S.people[S.me].act === act) btn.className = "on";
+    btn.onclick = () => { const p = S.people[S.me]; p.act = p.act === act ? "" : act; queuePerson(S.me, true); buzz(); drawAll(); };
+    chips.appendChild(btn);
   });
 }
 function drawGeo() {
@@ -1272,14 +1309,71 @@ function drawGeo() {
   $("#shareTg").setAttribute("aria-checked", String(!!S.share));
   $("#wakeTg").setAttribute("aria-checked", String(!!S.wake));
   st.className = "geo-stat" + (GEO.err ? " err" : on ? " on" : "");
-  const L = S.loc[S.me];
+  const L0 = S.loc[S.me];
   $("#geoTxt").textContent = GEO.err ? GEO.err
-    : !on ? (S.crew ? "Location sharing is off" : "Join the crew on Today to share with each other")
-    : !L ? "Getting a GPS fix…"
-    : "Sharing · fix " + ago(L.ts) + " · ±" + Math.round(L.acc) + " m" + (GEO.lastSent ? " · sent " + ago(GEO.lastSent.sentAt) : S.crew ? " · sending…" : "");
-  $("#shareSub").textContent = S.crew ? "Only with your crew. Encrypted." : "Needs the crew code to share.";
+    : !on ? (S.crew ? "Sharing from this page is off" : "Join the crew on Today to share with each other")
+    : !L0 ? "Getting a GPS fix…"
+    : "Sharing · fix " + ago(L0.ts) + " · ±" + Math.round(L0.acc) + " m" + (GEO.lastSent ? " · sent " + ago(GEO.lastSent.sentAt) : S.crew ? " · sending…" : "");
+  $("#shareSub").textContent = S.crew ? "While this page is open. Encrypted." : "Needs the crew code to share.";
+  drawOT();
 }
 
+/* ---------- background GPS via OwnTracks (free iOS app, HTTP mode → crew relay, libsodium secretbox) ---------- */
+function otKey() { const k = new Uint8Array(32); k.set(enc.encode(S.crew).slice(0, 32)); return k; }
+function otOpen(data) {
+  if (!window.nacl) return null;
+  try {
+    const all = unb64(data), pt = nacl.secretbox.open(all.slice(24), all.slice(0, 24), otKey());
+    return pt ? JSON.parse(dec.decode(pt)) : null;
+  } catch (e) { return null; }
+}
+function applyOT(j) {
+  const w = j.tid === "CO" ? 0 : j.tid === "CA" ? 1 : -1;
+  if (w < 0 || !isFinite(j.lat) || !isFinite(j.lon) || !j.tst) return;
+  setLoc(w, {lat:+j.lat, lon:+j.lon, acc:+j.acc || 0, ts:+j.tst * 1000, src:"ot", batt:isFinite(j.batt) ? +j.batt : null});
+}
+function otLink(w) {
+  const cfg = {_type:"configuration", mode:3, url:RELAY + "/" + SYNC.topic, tid:w ? "CA" : "CO", deviceId:NAMES[w].toLowerCase(),
+    monitoring:2, locatorDisplacement:50, locatorInterval:180, downgrade:20, ignoreInaccurateLocations:150, extendedData:true,
+    auth:false, cmd:false, allowRemoteLocation:false, remoteConfiguration:false};
+  return "owntracks:///config?inline=" + encodeURIComponent(btoa(JSON.stringify(cfg)));
+}
+function drawOT() {
+  const ok = !!(S.crew && SYNC.topic), a = $("#otLink");
+  a.textContent = "Connect as " + NAMES[S.me];
+  a.classList.toggle("dis", !ok);
+  a.href = ok ? otLink(S.me) : "#";
+  $("#otKey").classList.toggle("dis", !ok);
+  const L0 = S.loc[S.me], st = $("#otStat");
+  const working = L0 && L0.src === "ot";
+  st.className = "geo-stat" + (working && fresh(L0, 30) ? " on" : "");
+  $("#otTxt").textContent = !ok ? "Join the crew on Today first"
+    : working ? "Background GPS working · last fix " + ago(L0.ts) + (L0.batt != null ? " · " + Math.round(L0.batt) + "% battery" : "")
+    : "Waiting for the first background fix from OwnTracks";
+}
+
+/* ---------- offline map: pre-cache the city-centre tiles (the service worker keeps them) ---------- */
+function tileList() {
+  const out = [];
+  const x = (lon, z) => Math.floor((lon + 180) / 360 * 2 ** z);
+  const y = (lat, z) => { const a = lat * Math.PI / 180; return Math.floor((1 - Math.log(Math.tan(a) + 1 / Math.cos(a)) / Math.PI) / 2 * 2 ** z); };
+  for (let z = 12; z <= 16; z++) {
+    for (let tx = x(-3.003, z); tx <= x(-2.969, z); tx++) for (let ty = y(53.412, z); ty <= y(53.392, z); ty++)
+      [TILE_URL, LABEL_URL].forEach((u) => out.push(u.replace("{z}", z).replace("{y}", ty).replace("{x}", tx)));
+  }
+  return out;
+}
+async function saveOffline() {
+  const btn = $("#saveMapBtn"), list = tileList();
+  if (btn.dataset.busy) return;
+  btn.dataset.busy = "1";
+  let done = 0, failed = 0, i = 0;
+  const worker = async () => { while (i < list.length) { const u = list[i++]; try { const r = await fetch(u, {mode:"cors"}); if (!r.ok) failed++; } catch (e) { failed++; } btn.textContent = "Saving map… " + Math.round(++done / list.length * 100) + "%"; } };
+  await Promise.all([worker(), worker(), worker(), worker(), worker(), worker()]);
+  delete btn.dataset.busy;
+  btn.textContent = failed ? "Saved with gaps — try again on Wi-Fi" : "Map saved for offline ✓";
+  if (!failed) { S.mapSaved = Date.now(); save(); }
+}
 /* ---------- heart rate ---------- */
 function drawHr() {
   [0, 1].forEach((w) => {
@@ -1324,6 +1418,7 @@ function show(v) {
   try { sessionStorage.setItem("bhq-tab", v); } catch (e) {}
   window.scrollTo(0, 0);
   if (v === "night") drawChart();
+  if (v === "map") setTimeout(() => { if (initMap()) MAP.m.invalidateSize(); drawMap(); }, 40);
 }
 document.querySelectorAll("nav.tabs button").forEach((b) => b.onclick = () => { show(b.dataset.go); buzz(6); });
 function guide(g) {
@@ -1331,7 +1426,16 @@ function guide(g) {
   document.querySelectorAll(".gp").forEach((p) => p.classList.toggle("on", p.id === "g-" + g));
 }
 document.querySelectorAll("#gseg button").forEach((b) => b.onclick = () => guide(b.dataset.g));
-document.querySelectorAll("#zoomSeg button").forEach((b) => b.onclick = () => { S.zoom = b.dataset.z; save(); buzz(6); drawMap(); });
+$("#fitBtn").onclick = () => { fitMap("both"); buzz(6); };
+$("#meBtn").onclick = () => { fitMap("me"); buzz(6); };
+$("#saveMapBtn").onclick = saveOffline;
+if (S.mapSaved) $("#saveMapBtn").textContent = "Map saved for offline ✓";
+$("#otKey").onclick = async () => {
+  if (!S.crew) return;
+  try { await navigator.clipboard.writeText(S.crew.slice(0, 32)); toast("Key copied — paste it into OwnTracks"); }
+  catch (e) { prompt("Copy this key into OwnTracks:", S.crew.slice(0, 32)); }
+};
+$("#otLink").addEventListener("click", (e) => { if (!S.crew) { e.preventDefault(); toast("Join the crew on Today first"); } });
 document.querySelectorAll("#mePick0 button,#mePick button").forEach((b) => b.onclick = () => {
   if (S.me === +b.dataset.me) return;
   S.me = +b.dataset.me; GEO.lastSent = null; save(); drawAll();
