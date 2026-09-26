@@ -150,7 +150,9 @@ details[open] summary:after{content:"–"}
 .spot{display:flex;align-items:center;gap:7px;white-space:nowrap}
 .spot i{width:12px;height:12px;border-radius:50%;background:#0a0a0b;border:2.5px solid #d8d8dc;flex:none}
 .spot span{font:700 13px/1 var(--disp);letter-spacing:.08em;text-transform:uppercase;color:#cfcfd4;text-shadow:0 1px 2px #000,0 0 8px #000,0 0 3px #000}
-.spot.hot i{background:#fff;border-color:#fff;box-shadow:0 0 0 5px rgba(255,255,255,.18)}
+.spot.hot i{position:relative;background:#fff;border-color:#fff;box-shadow:0 0 0 5px rgba(255,255,255,.18)}
+.spot.hot i:after{content:"";position:absolute;inset:-9px;border-radius:50%;border:2px solid #fff;animation:beacon 2s ease-out infinite}
+@keyframes beacon{0%{transform:scale(.5);opacity:.9}100%{transform:scale(2.2);opacity:0}}
 .spot.day i{border-style:dashed}
 .spot.covered span{display:none}
 
@@ -347,6 +349,28 @@ ol.days p{margin:5px 0 0;color:var(--mute);font-size:14.5px}
 .word b{display:block;font:800 22px/1 var(--disp);text-transform:uppercase}
 .word span{display:block;margin-top:5px;color:var(--mute);font-size:13.5px;line-height:1.4}
 
+.phpin{position:relative;width:44px;height:44px;border-radius:12px;background:#1b1b1e center/cover no-repeat;border:2.5px solid var(--pc);box-shadow:0 6px 18px rgba(0,0,0,.6);cursor:pointer;transform-origin:50% 100%;animation:phIn .5s cubic-bezier(.3,1.5,.5,1) both}
+.phpin:after{content:"";position:absolute;left:50%;bottom:-8px;margin-left:-6px;border:6px solid transparent;border-top-color:var(--pc);border-bottom:0}
+@keyframes phIn{from{transform:scale(0)}to{transform:scale(1)}}
+#lightbox{position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.94);display:none;align-items:center;justify-content:center;flex-direction:column}
+#lightbox.on{display:flex;animation:in .25s ease}
+#lbImg{max-width:100%;max-height:calc(100dvh - 150px);object-fit:contain}
+.lb-bar{display:flex;align-items:center;gap:14px;margin-top:14px;padding:0 16px;max-width:600px;width:100%}
+.lb-bar span{flex:1;text-align:center;font:700 14px/1.3 var(--disp);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.lb-bar button{width:44px;height:44px;border-radius:12px;background:var(--p2);border:1px solid var(--line2);font:700 26px/1 var(--sans);color:var(--ink)}
+#lbClose{position:absolute;right:14px;top:calc(env(safe-area-inset-top) + 12px);width:44px;height:44px;border-radius:12px;background:var(--p2);border:1px solid var(--line2);font:400 30px/1 var(--sans);color:var(--ink)}
+#splash{position:fixed;inset:0;z-index:200;background:#0a0a0b;display:grid;place-items:center;animation:spOut .6s ease 1.5s forwards}
+#splash.skip{display:none}
+.sp-in{text-align:center}
+.sp-w{font:800 88px/.82 var(--disp);text-transform:uppercase;letter-spacing:-.02em;animation:spRise .9s cubic-bezier(.2,.9,.2,1) both}
+.sp-d{display:flex;gap:14px;justify-content:center;margin-top:22px}
+.sp-d i{width:16px;height:16px;border-radius:50%;animation:spPop .5s cubic-bezier(.3,1.6,.5,1) both}
+.sp-d i:nth-child(1){animation-delay:.45s}.sp-d i:nth-child(2){animation-delay:.6s}
+.sp-s{margin-top:18px;font:700 14px/1 var(--disp);letter-spacing:.3em;text-transform:uppercase;color:var(--mute);animation:spFade .6s ease .75s both}
+@keyframes spRise{from{opacity:0;transform:translateY(24px);letter-spacing:.2em}to{opacity:1;transform:none}}
+@keyframes spPop{from{transform:scale(0)}to{transform:scale(1)}}
+@keyframes spFade{from{opacity:0}to{opacity:1}}
+@keyframes spOut{to{opacity:0;visibility:hidden}}
 .toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 86px);transform:translate(-50%,16px);z-index:90;padding:12px 18px;border-radius:14px;
   background:var(--ink);color:#0a0a0b;font:700 15px/1 var(--disp);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;opacity:0;transition:.25s;pointer-events:none;box-shadow:0 10px 30px rgba(0,0,0,.5)}
 .toast.on{opacity:1;transform:translate(-50%,0)}
@@ -354,6 +378,7 @@ ol.days p{margin:5px 0 0;color:var(--mute);font-size:14.5px}
 </style>
 </head>
 <body class="maplive">
+<div id="splash" aria-hidden="true"><div class="sp-in"><div class="sp-w">Bender<br>HQ</div><div class="sp-d"><i style="background:var(--co)"></i><i style="background:var(--ca)"></i></div><div class="sp-s">Liverpool · 8–11 Oct</div></div></div>
 
 <header class="top">
   <div class="top-in">
@@ -427,7 +452,8 @@ ol.days p{margin:5px 0 0;color:var(--mute);font-size:14.5px}
         </details>
       </div>
 
-      <div class="sec map-foot"><span id="mapNote">Your GPS: off</span><button id="saveMapBtn">Save map offline</button></div>
+      <div class="sec map-foot"><span><span id="mapNote">Page GPS off</span> <span id="phCount"></span></span><button id="saveMapBtn">Save map offline</button></div>
+      <p class="fine">📸 Send buddehbot photos on Telegram — they pin to the map where they were taken, encrypted for the two of you.</p>
     </div>
   </div>
 </section>
@@ -571,6 +597,7 @@ ol.days p{margin:5px 0 0;color:var(--mute);font-size:14.5px}
 </main>
 
 <div class="toast" id="toast" role="status"></div>
+<div id="lightbox" role="dialog" aria-label="Photo"><img id="lbImg" alt=""><div class="lb-bar"><button id="lbPrev" aria-label="Previous photo">‹</button><span id="lbCap"></span><button id="lbNext" aria-label="Next photo">›</button></div><button id="lbClose" aria-label="Close">×</button></div>
 
 <nav class="tabs">
   <button data-go="map" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.6"/></svg>Live</button>
@@ -583,7 +610,8 @@ ol.days p{margin:5px 0 0;color:var(--mute);font-size:14.5px}
 <script src="vendor/nacl-fast.min.js"></script>
 <script>
 "use strict";
-/* Bender HQ v6 — 3D night map (MapLibre + OpenFreeMap). Sync/crypto/BAC/OwnTracks logic unchanged from v4. */
+if (sessionStorage.getItem("bhq-intro") || /[?&]shot=1/.test(location.search)) document.getElementById("splash").classList.add("skip");
+/* Bender HQ v7 — light beams, gliding pins, comet trails, photo pins, intro fly-in. Sync/crypto/BAC/OwnTracks logic unchanged from v4. */
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const buzz = (ms) => { if (navigator.vibrate) navigator.vibrate(ms || 12); };
@@ -763,6 +791,8 @@ async function handleMsg(m) {
       save(); scheduleDraw();
       if (p.drinks.length > before) { const d = p.drinks[p.drinks.length - 1]; toast(NAMES[o.who] + " · " + KINDS[d[1]][0] + " logged"); }
     }
+  } else if (o.t === "photos") {
+    [8e3, 70e3, 150e3].forEach((d) => setTimeout(loadPhotos, d));   /* GitHub Pages takes ~1 min to publish */
   } else if (o.t === "loc") {
     const L = cleanLoc(o);
     if (L) setLoc(o.who, L);
@@ -829,6 +859,7 @@ async function crewConnect(code, quiet) {
   flushPending();
   openStream();
   checkBudget();
+  loadPhotos();
   drawAll();
   return true;
 }
@@ -997,10 +1028,20 @@ function drawTally() {
   const icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
   $("#scoreMeta").innerHTML = icon + (last ? "Logged by buddehbot · last update " + ago(last) : "Only buddehbot can log drinks — text him");
 }
+/* animate a number from what's shown to the new value */
+function countTo(el, v, dp) {
+  if (v === null || v === undefined) { el.textContent = "—"; el.dataset.v = ""; return; }
+  const from = el.dataset.v === "" || el.dataset.v === undefined ? 0 : +el.dataset.v;
+  el.dataset.v = v;
+  if (Math.abs(from - v) < 1e-9 || matchMedia("(prefers-reduced-motion: reduce)").matches) { el.textContent = v.toFixed(dp); return; }
+  const t0 = performance.now(), D = 700;
+  const step = (now) => { const k = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - k, 3); el.textContent = (from + (v - from) * e).toFixed(dp); if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
 function drawBac() {
   [0, 1].forEach((w) => {
     const b = bacNow(w), el = $("#bac" + w), m = $("#mt" + w);
-    el.textContent = b === null ? "—" : b.toFixed(3);
+    countTo(el, b, 3);
     el.style.color = bacColor(b);
     $("#msg" + w).textContent = bacWords(b);
     m.style.width = (b ? Math.min(100, b / 0.2 * 100) : 0) + "%"; m.style.background = bacColor(b);
@@ -1132,7 +1173,9 @@ const NIGHT_STYLE = {
       paint:{"text-color":"#4a4a52", "text-halo-color":"#0b0b0d", "text-halo-width":1.2}}
   ]
 };
-const MAP = {m:null, ready:false, pins:[null, null], spots:[], spotKey:[], pinKey:["", ""], fitted:false};
+const MAP = {m:null, ready:false, pins:[null, null], spots:[], spotKey:[], pinKey:["", ""], fitted:false, disp:[null, null], glide:[null, null], beamH:[0, 0]};
+const INTRO = !sessionStorage.getItem("bhq-intro") && !/[?&]shot=1/.test(location.search);          /* first open this session → splash + camera fly-in */
+const rgba = (hex, a) => "rgba(" + parseInt(hex.slice(1, 3), 16) + "," + parseInt(hex.slice(3, 5), 16) + "," + parseInt(hex.slice(5, 7), 16) + "," + a + ")";
 const fresh = (L, mins) => L && Date.now() - L.ts < mins * 60e3;
 function where(w) {
   const L0 = S.loc[w], p = S.people[w];
@@ -1162,7 +1205,7 @@ function initMap() {
   if (!window.maplibregl || !$("#lmap").offsetWidth) return false;
   const probe = document.createElement("canvas");
   if (!(probe.getContext("webgl2") || probe.getContext("webgl"))) { $("#mapBanner").textContent = "This browser can't draw the 3D map"; $("#mapBanner").hidden = false; return false; }
-  const m = new maplibregl.Map({container:"lmap", style:NIGHT_STYLE, center:CENTRE, zoom:15.3, pitch:CAM.pitch, bearing:CAM.bearing, minZoom:11, maxZoom:19.5, maxPitch:72,
+  const m = new maplibregl.Map({container:"lmap", style:NIGHT_STYLE, center:CENTRE, zoom:INTRO ? 12.4 : 15.3, pitch:INTRO ? 0 : CAM.pitch, bearing:INTRO ? 20 : CAM.bearing, minZoom:11, maxZoom:19.5, maxPitch:72,
     attributionControl:false, dragRotate:true, canvasContextAttributes:{antialias:true, preserveDrawingBuffer:/[?&]shot=1/.test(location.search)}});
   m.addControl(new maplibregl.AttributionControl({compact:true}), "top-left");
   m.touchZoomRotate.enableRotation();
@@ -1173,13 +1216,26 @@ function initMap() {
     m.addSource("acc", {type:"geojson", data:{type:"FeatureCollection", features:[]}});
     m.addLayer({id:"acc-fill", type:"fill", source:"acc", paint:{"fill-color":["get", "c"], "fill-opacity":0.08}});
     m.addLayer({id:"acc-line", type:"line", source:"acc", paint:{"line-color":["get", "c"], "line-opacity":0.45, "line-width":1}});
-    m.addSource("trail", {type:"geojson", data:{type:"FeatureCollection", features:[]}, lineMetrics:true});
-    m.addLayer({id:"trail-glow", type:"line", source:"trail", layout:{"line-cap":"round", "line-join":"round"},
-      paint:{"line-color":["get", "c"], "line-width":12, "line-blur":8, "line-opacity":0.35}});
-    m.addLayer({id:"trail", type:"line", source:"trail", layout:{"line-cap":"round", "line-join":"round"},
-      paint:{"line-color":["get", "c"], "line-width":3.5, "line-opacity":0.95}});
+    [0, 1].forEach((w) => {
+      const c = UI_C[w], grad = (a) => ["interpolate", ["linear"], ["line-progress"], 0, rgba(c, 0), 0.55, rgba(c, a * 0.45), 1, rgba(c, a)];
+      m.addSource("trail" + w, {type:"geojson", data:{type:"FeatureCollection", features:[]}, lineMetrics:true});
+      m.addLayer({id:"trail-glow" + w, type:"line", source:"trail" + w, layout:{"line-cap":"round", "line-join":"round"}, paint:{"line-width":14, "line-blur":9, "line-gradient":grad(0.45)}});
+      m.addLayer({id:"trail" + w, type:"line", source:"trail" + w, layout:{"line-cap":"round", "line-join":"round"}, paint:{"line-width":4, "line-gradient":grad(1)}});
+    });
+    /* light beams: a glowing column rising out of each pin through the 3D city */
+    m.addSource("beams", {type:"geojson", data:{type:"FeatureCollection", features:[]}});
+    m.addLayer({id:"beam-halo", type:"fill-extrusion", source:"beams", filter:["==", ["get", "k"], "halo"],
+      paint:{"fill-extrusion-color":["get", "c"], "fill-extrusion-height":["get", "h"], "fill-extrusion-base":0, "fill-extrusion-opacity":0.13, "fill-extrusion-vertical-gradient":true}});
+    m.addLayer({id:"beam-core", type:"fill-extrusion", source:"beams", filter:["==", ["get", "k"], "core"],
+      paint:{"fill-extrusion-color":["get", "c"], "fill-extrusion-height":["get", "h"], "fill-extrusion-base":0, "fill-extrusion-opacity":0.6, "fill-extrusion-vertical-gradient":true}});
     MAP.ready = true;
     drawMap();
+    drawPhotos();
+    if (INTRO) {
+      sessionStorage.setItem("bhq-intro", "1");
+      const go = () => { if (!MAP.flown) { MAP.flown = true; MAP.fitted ? fitMap("both", 2800) : m.easeTo({center:CENTRE, zoom:15.3, pitch:CAM.pitch, bearing:CAM.bearing, padding:camPad(), duration:3200, easing:(t) => 1 - Math.pow(1 - t, 3)}); } };
+      m.once("idle", go); setTimeout(go, 2500);
+    }
   });
   SPOTS.forEach((s, i) => {
     const el = document.createElement("div");
@@ -1199,13 +1255,13 @@ function initMap() {
   return true;
 }
 function camPad() { return {top:130, bottom:sheetCover() + 50, left:80, right:90}; }
-function fitMap(which) {
+function fitMap(which, dur) {
   if (!MAP.m) return;
   const pts = (which === "me" ? [S.me] : [0, 1]).map(where).filter((a) => a.kind !== "none").map((a) => a.ll);
   if (!pts.length) { MAP.m.easeTo({center:CENTRE, zoom:15.3, pitch:CAM.pitch, bearing:CAM.bearing, padding:camPad(), duration:900}); if (which === "me") toast("No location yet"); return; }
-  if (pts.length === 1) { MAP.m.easeTo({center:pts[0], zoom:16.6, pitch:CAM.pitch, bearing:CAM.bearing, padding:camPad(), duration:900}); return; }
+  if (pts.length === 1) { MAP.m.easeTo({center:pts[0], zoom:16.6, pitch:CAM.pitch, bearing:CAM.bearing, padding:camPad(), duration:dur || 900}); return; }
   const b = new maplibregl.LngLatBounds(pts[0], pts[0]); pts.forEach((p) => b.extend(p));
-  MAP.m.fitBounds(b, {padding:camPad(), maxZoom:16.8, pitch:CAM.pitch, bearing:CAM.bearing, duration:1000});
+  MAP.m.fitBounds(b, {padding:camPad(), maxZoom:16.8, pitch:CAM.pitch, bearing:CAM.bearing, duration:dur || 1000});
 }
 /* one continuous trail per person: skip jitter (<15 m within a minute), keep 3 h, max 400 points */
 function addTrail(w, L0) {
@@ -1222,6 +1278,34 @@ function setLoc(w, L0) {
   addTrail(w, L0);
   if (!S.loc[w] || L0.ts > S.loc[w].ts) { S.loc[w] = L0; save(); scheduleDraw(); }
 }
+function drawBeams() {
+  if (!MAP.ready) return;
+  const f = [];
+  [0, 1].forEach((w) => {
+    const d = MAP.disp[w];
+    if (!d || !MAP.beamH[w]) return;
+    f.push({type:"Feature", properties:{k:"halo", c:UI_C[w], h:MAP.beamH[w] * 0.7}, geometry:{type:"Polygon", coordinates:[circle(d[0], d[1], 7)]}});
+    f.push({type:"Feature", properties:{k:"core", c:UI_C[w], h:MAP.beamH[w]}, geometry:{type:"Polygon", coordinates:[circle(d[0], d[1], 2.4)]}});
+  });
+  MAP.m.getSource("beams").setData({type:"FeatureCollection", features:f});
+}
+/* ease a pin from where it is drawn to its new fix (jumps if it's far or the first fix) */
+function glideTo(w, ll) {
+  const pin = MAP.pins[w], from = MAP.disp[w];
+  if (from && from[0] === ll[0] && from[1] === ll[1]) return;
+  cancelAnimationFrame(MAP.glide[w]);
+  if (!from || haversine({lat:from[1], lon:from[0]}, {lat:ll[1], lon:ll[0]}) > 1500 || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    MAP.disp[w] = ll; pin.setLngLat(ll); drawBeams(); return;
+  }
+  const t0 = performance.now(), D = 1400, ease = (t) => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const step = (now) => {
+    const k = ease(Math.min(1, (now - t0) / D));
+    MAP.disp[w] = [from[0] + (ll[0] - from[0]) * k, from[1] + (ll[1] - from[1]) * k];
+    pin.setLngLat(MAP.disp[w]); drawBeams();
+    if (k < 1) MAP.glide[w] = requestAnimationFrame(step);
+  };
+  MAP.glide[w] = requestAnimationFrame(step);
+}
 function drawMap() {
   const pos = [0, 1].map(where);
   if (initMap()) {
@@ -1232,25 +1316,27 @@ function drawMap() {
       const key = hot + "|" + covered;
       if (MAP.spotKey[i] !== key) { MAP.spotKey[i] = key; MAP.spots[i].getElement().innerHTML = spotHTML(s, hot, covered); }
     });
-    const cut = Date.now() - 3 * 36e5, acc = [], trails = [];
+    const cut = Date.now() - 3 * 36e5, acc = [], trails = [[], []];
     [0, 1].forEach((w) => {
       const at = pos[w], pin = MAP.pins[w], L0 = S.loc[w];
-      if (at.kind === "none") { pin.remove(); MAP.pinKey[w] = ""; }
+      if (at.kind === "none") { pin.remove(); MAP.pinKey[w] = ""; MAP.disp[w] = null; MAP.beamH[w] = 0; }
       else {
         const b = bacNow(w), key = at.kind + pinState(w, at.kind) + (b ? b.toFixed(2) : "");
-        pin.setLngLat(at.ll);
+        glideTo(w, at.ll);
+        MAP.beamH[w] = at.kind === "gps" ? (fresh(L0, 15) ? 260 : 140) : 110;
         if (MAP.pinKey[w] !== key) { MAP.pinKey[w] = key; pin.el.innerHTML = pinHTML(w, at.kind); }
         if (!pin.getElement().isConnected) pin.addTo(m);
         if (at.kind === "gps" && L0.acc > 10) acc.push({type:"Feature", properties:{c:UI_C[w]}, geometry:{type:"Polygon", coordinates:[circle(L0.lon, L0.lat, Math.min(L0.acc, 400))]}});
       }
       const pts = (S.trail[w] || []).filter((t) => t[2] >= cut).map((t) => [t[1], t[0]]);
-      if (pts.length > 1) trails.push({type:"Feature", properties:{c:UI_C[w]}, geometry:{type:"LineString", coordinates:pts}});
+      if (pts.length > 1) trails[w].push({type:"Feature", properties:{}, geometry:{type:"LineString", coordinates:pts}});
     });
     if (MAP.ready) {
       m.getSource("acc").setData({type:"FeatureCollection", features:acc});
-      m.getSource("trail").setData({type:"FeatureCollection", features:trails});
+      [0, 1].forEach((w) => m.getSource("trail" + w).setData({type:"FeatureCollection", features:trails[w]}));
+      drawBeams();
     }
-    if (!MAP.fitted && pos.some((a) => a.kind !== "none")) { MAP.fitted = true; setTimeout(() => fitMap("both"), 60); }
+    if (!MAP.fitted && pos.some((a) => a.kind !== "none")) { MAP.fitted = true; if (!INTRO || MAP.flown) setTimeout(() => fitMap("both"), 60); }
   }
   const a = S.loc[0], b = S.loc[1];
   if (fresh(a, 45) && fresh(b, 45)) {
@@ -1344,6 +1430,63 @@ function drawOT() {
     : working ? "Background GPS working · last fix " + ago(L0.ts) + (L0.batt != null ? " · " + Math.round(L0.batt) + "% battery" : "")
     : "Waiting for the first background fix from OwnTracks";
 }
+
+/* ---------- photo pins: encrypted photos (only buddehbot adds them) pinned where they were taken ---------- */
+const PH = {list:[], markers:{}, urls:{}, busy:false};
+async function unsealBytes(b64txt) {
+  const all = unb64(b64txt.trim());
+  return new Uint8Array(await crypto.subtle.decrypt({name:"AES-GCM", iv:all.slice(0, 12)}, SYNC.key, all.slice(12)));
+}
+async function photoURL(id, kind) {
+  const k = id + kind;
+  if (PH.urls[k]) return PH.urls[k];
+  const r = await fetch("photos/" + id + "." + kind + ".txt");
+  if (!r.ok) throw new Error(r.status);
+  PH.urls[k] = URL.createObjectURL(new Blob([await unsealBytes(await r.text())], {type:"image/jpeg"}));
+  return PH.urls[k];
+}
+async function loadPhotos() {
+  if (!SYNC.key || PH.busy) return;
+  PH.busy = true;
+  try {
+    const r = await fetch("photos/index.txt?cb=" + Date.now(), {cache:"no-store"});
+    if (r.ok) {
+      const o = await unseal((await r.text()).trim());
+      if (o && Array.isArray(o.photos)) { PH.list = o.photos.filter((x) => x && x.id && isFinite(x.lat) && isFinite(x.lon)); drawPhotos(); }
+    }
+  } catch (e) {} finally { PH.busy = false; }
+}
+function drawPhotos() {
+  $("#phCount").textContent = PH.list.length ? PH.list.length + (PH.list.length === 1 ? " photo" : " photos") : "";
+  if (!MAP.m) return;
+  PH.list.forEach((ph) => {
+    if (PH.markers[ph.id]) return;
+    /* the map positions the outer element with a CSS transform, so animate only the inner one */
+    const wrap = document.createElement("div"), el = document.createElement("button");
+    el.className = "phpin"; el.style.setProperty("--pc", UI_C[ph.who === 1 ? 1 : 0]);
+    el.setAttribute("aria-label", "Photo from " + NAMES[ph.who === 1 ? 1 : 0] + " at " + ukTime(ph.ts));
+    el.addEventListener("click", (e) => { e.stopPropagation(); openPhoto(ph.id); });
+    wrap.appendChild(el);
+    PH.markers[ph.id] = new maplibregl.Marker({element:wrap, anchor:"bottom", offset:[0, -26]}).setLngLat([ph.lon, ph.lat]).addTo(MAP.m);
+    photoURL(ph.id, "t").then((u) => { el.style.backgroundImage = "url(" + u + ")"; }).catch(() => {});
+  });
+}
+async function openPhoto(id) {
+  const i = PH.list.findIndex((x) => x.id === id);
+  if (i < 0) return;
+  const ph = PH.list[i], box = $("#lightbox");
+  box.dataset.i = i;
+  $("#lbImg").removeAttribute("src");
+  $("#lbCap").textContent = (ph.cap ? ph.cap + " · " : "") + NAMES[ph.who === 1 ? 1 : 0] + " · " + ukTime(ph.ts);
+  box.classList.add("on");
+  try { $("#lbImg").src = await photoURL(id, "f"); } catch (e) { $("#lbCap").textContent = "Couldn't load this photo — needs signal the first time"; }
+}
+function stepPhoto(d) {
+  const sorted = PH.list.slice().sort((a, b) => a.ts - b.ts), cur = PH.list[+$("#lightbox").dataset.i];
+  const j = sorted.findIndex((x) => x.id === cur.id) + d;
+  if (j >= 0 && j < sorted.length) openPhoto(sorted[j].id);
+}
+setInterval(loadPhotos, 10 * 60e3);
 
 /* ---------- bottom sheet ---------- */
 const TAB_H = 84;
@@ -1459,6 +1602,10 @@ $("#otKey").onclick = async () => {
 };
 $("#otLink").addEventListener("click", (e) => { if (!S.crew) { e.preventDefault(); toast("Join the crew on Trip first"); } });
 $("#crewHint").onclick = () => show("today");
+$("#lbClose").onclick = () => $("#lightbox").classList.remove("on");
+$("#lbPrev").onclick = (e) => { e.stopPropagation(); stepPhoto(-1); };
+$("#lbNext").onclick = (e) => { e.stopPropagation(); stepPhoto(1); };
+$("#lightbox").addEventListener("click", (e) => { if (e.target.id === "lightbox" || e.target.id === "lbImg") $("#lightbox").classList.remove("on"); });
 document.querySelectorAll("#mePick0 button,#mePick button").forEach((b) => b.onclick = () => {
   if (S.me === +b.dataset.me) return;
   S.me = +b.dataset.me; GEO.lastSent = null; save(); drawAll();
