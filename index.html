@@ -374,11 +374,42 @@ ol.days p{margin:5px 0 0;color:var(--mute);font-size:14.5px}
 .toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 86px);transform:translate(-50%,16px);z-index:90;padding:12px 18px;border-radius:14px;
   background:var(--ink);color:#0a0a0b;font:700 15px/1 var(--disp);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;opacity:0;transition:.25s;pointer-events:none;box-shadow:0 10px 30px rgba(0,0,0,.5)}
 .toast.on{opacity:1;transform:translate(-50%,0)}
+/* ---------- photography ---------- */
+.phero{position:relative;margin:calc(-64px - env(safe-area-inset-top)) -18px 0;min-height:max(460px,64vh);background:#111 center/cover no-repeat;display:flex;align-items:flex-end}
+.phero:before{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(10,10,11,.55) 0%,rgba(10,10,11,.05) 30%,rgba(10,10,11,.35) 60%,#0a0a0b 100%)}
+.phero-in{position:relative;padding:0 18px 22px;width:100%}
+.phero .kicker{color:rgba(255,255,255,.85);text-shadow:0 1px 8px rgba(0,0,0,.6)}
+.phero .giant{text-shadow:0 4px 30px rgba(0,0,0,.45)}
+.phero .sub{color:rgba(255,255,255,.8)}
+.pband{position:relative;margin:calc(-64px - env(safe-area-inset-top)) -18px 0;height:max(260px,34vh);background:#111 center/cover no-repeat;display:flex;align-items:flex-end}
+.pband:before{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(10,10,11,.6) 0%,rgba(10,10,11,.15) 40%,#0a0a0b 100%)}
+.pband-in{position:relative;padding:0 18px 16px}
+.pband .kicker{color:rgba(255,255,255,.85)}
+ol.days li{display:block;padding:0;margin-bottom:14px;border:0;border-radius:18px;overflow:hidden;background:var(--p1)}
+ol.days .dimg{position:relative;height:170px;background:#111 center/cover no-repeat;display:flex;align-items:flex-end}
+ol.days .dimg:before{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 35%,rgba(10,10,11,.85) 100%)}
+ol.days .dd{position:relative;padding:0 16px 12px;display:flex;align-items:baseline;gap:10px}
+ol.days .dd b{font:800 52px/.85 var(--disp)}
+ol.days .dd small{font:700 13px/1 var(--disp);letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.8)}
+ol.days .dtx{padding:14px 16px 16px}
+ol.days li.now{box-shadow:0 0 0 2px var(--ink)}
+ol.days li.now:before{z-index:2;right:12px;top:12px}
+.stops li{display:block;padding:0;margin-top:16px;border:0;border-radius:20px;overflow:hidden;background:var(--p1)}
+.stops .simg{position:relative;height:210px;background:#111 center/cover no-repeat}
+.stops .simg:before{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 45%,rgba(10,10,11,.8) 100%)}
+.stops .simg .ix{position:absolute;left:16px;bottom:10px;font:800 56px/.85 var(--disp);color:#fff;text-shadow:0 2px 16px rgba(0,0,0,.5)}
+.stops .stx{padding:14px 16px 18px}
+.credits{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);color:var(--faint);font-size:12px}
+.credits h3{margin:0 0 8px;font:800 14px/1 var(--disp);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.credits ul{margin:0;padding-left:16px}.credits a{color:var(--mute)}
+#splash:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(10,10,11,.55),rgba(10,10,11,.92))}
+#splash .sp-in{position:relative}
+
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body class="maplive">
-<div id="splash" aria-hidden="true"><div class="sp-in"><div class="sp-w">Bender<br>HQ</div><div class="sp-d"><i style="background:var(--co)"></i><i style="background:var(--ca)"></i></div><div class="sp-s">Liverpool · 8–11 Oct</div></div></div>
+<div id="splash" aria-hidden="true" style="background:#0a0a0b url(img/hero.jpg) center/cover"><div class="sp-in"><div class="sp-w">Bender<br>HQ</div><div class="sp-d"><i style="background:var(--co)"></i><i style="background:var(--ca)"></i></div><div class="sp-s">Liverpool · 8–11 Oct</div></div></div>
 
 <header class="top">
   <div class="top-in">
@@ -462,8 +493,7 @@ ol.days p{margin:5px 0 0;color:var(--mute);font-size:14.5px}
 
 <!-- ================= TONIGHT ================= -->
 <section class="view" id="v-night">
-  <div class="kicker">Tonight · resets 6am</div>
-  <h1 class="big">The Night</h1>
+  <div class="pband" style="background-image:url(img/pint.jpg)"><div class="pband-in"><div class="kicker">Tonight · resets 6am</div><h1 class="big">The Night</h1></div></div>
 
   <div class="bac2">
     <div class="bacc" style="--pc:var(--co)"><h3><i></i>Colin</h3><div class="n num" id="bac0">—</div><div class="m" id="msg0"></div><div class="sob" id="sob0"></div><div class="meter"><i id="mt0"></i></div></div>
@@ -507,9 +537,11 @@ ol.days p{margin:5px 0 0;color:var(--mute);font-size:14.5px}
 <!-- ================= TRIP ================= -->
 <section class="view" id="v-today">
   <div class="hero">
-    <div class="kicker" id="heroEyebrow">Colin × Cailyn</div>
-    <div class="giant"><span class="num" id="heroBig">–</span><span class="unit" id="heroUnit">days to Liverpool</span></div>
-    <div class="sub" id="heroWhen">Thu 8 – Sun 11 October 2026</div>
+    <div class="phero" style="background-image:url(img/hero.jpg)"><div class="phero-in">
+      <div class="kicker" id="heroEyebrow">Colin × Cailyn</div>
+      <div class="giant"><span class="num" id="heroBig">–</span><span class="unit" id="heroUnit">days to Liverpool</span></div>
+      <div class="sub" id="heroWhen">Thu 8 – Sun 11 October 2026</div>
+    </div></div>
     <div class="clocks">
       <div><small>Liverpool</small><b class="num" id="ukClock">--:--</b></div>
       <div><small>New York</small><b class="num" id="nyClock">--:--</b></div>
@@ -544,18 +576,17 @@ ol.days p{margin:5px 0 0;color:var(--mute);font-size:14.5px}
 
 <!-- ================= GUIDE ================= -->
 <section class="view" id="v-guide">
-  <div class="kicker">Field guide</div>
-  <h1 class="big">Liverpool</h1>
+  <div class="pband" style="background-image:url(img/bold.jpg)"><div class="pband-in"><div class="kicker">Field guide</div><h1 class="big">Liverpool</h1></div></div>
   <div class="utabs" id="gseg"><button data-g="route" class="on">Route</button><button data-g="money">Money</button><button data-g="rules">Rules</button><button data-g="scouse">Scouse</button></div>
 
   <div class="gp on" id="g-route">
     <ol class="stops">
-      <li><div class="ix">01</div><div><h4>Concert Square</h4><div class="m">Ropewalks · the start</div><p>Open-air square ringed with bars. Loud, young, rammed. First-pint energy — not where you want to be at 2am.</p></div></li>
-      <li><div class="ix">02</div><div><h4>Seel &amp; Slater St</h4><div class="m">2 min · the engine</div><p>Right off Concert Square. Denser, better, proper bars. Most of the night should happen here.</p></div></li>
-      <li><div class="ix">03</div><div><h4>Bold Street</h4><div class="m">4 min · food</div><p>Independent restaurants. Eat here before you need to, not after. This is what buys you Saturday.</p></div></li>
-      <li><div class="ix">04</div><div><h4>Baltic Triangle</h4><div class="m">12 min south · the cool one</div><p>Warehouses, street food, bigger venues, later licences. Far enough out to feel found. Worth it once.</p></div></li>
-      <li><div class="ix">05</div><div><h4>Mathew Street</h4><div class="m">8 min north · the tourist one</div><p>Cavern Quarter. Beatles, live bands, unashamedly for visitors. Do it once, enjoy it honestly.</p></div></li>
-      <li><div class="ix">☀</div><div><h4>Albert Dock</h4><div class="m">Daytime</div><p>Saturday afternoon, to feel like a person again. Water, air, food, no strobes.</p></div></li>
+      <li><div class="simg" style="background-image:url(img/concert.jpg)"><span class="ix">01</span></div><div class="stx"><h4>Concert Square</h4><div class="m">Ropewalks · the start</div><p>Open-air square ringed with bars. Loud, young, rammed. First-pint energy — not where you want to be at 2am.</p></div></li>
+      <li><div class="simg" style="background-image:url(img/seel.jpg)"><span class="ix">02</span></div><div class="stx"><h4>Seel &amp; Slater St</h4><div class="m">2 min · the engine</div><p>Right off Concert Square. Denser, better, proper bars. Most of the night should happen here.</p></div></li>
+      <li><div class="simg" style="background-image:url(img/bold.jpg)"><span class="ix">03</span></div><div class="stx"><h4>Bold Street</h4><div class="m">4 min · food</div><p>Independent restaurants. Eat here before you need to, not after. This is what buys you Saturday.</p></div></li>
+      <li><div class="simg" style="background-image:url(img/baltic.jpg)"><span class="ix">04</span></div><div class="stx"><h4>Baltic Triangle</h4><div class="m">12 min south · the cool one</div><p>Warehouses, street art, street food, later licences. Far enough out to feel found. Worth it once.</p></div></li>
+      <li><div class="simg" style="background-image:url(img/mathew.jpg)"><span class="ix">05</span></div><div class="stx"><h4>Mathew Street</h4><div class="m">8 min north · the tourist one</div><p>Cavern Quarter. Beatles, live bands, unashamedly for visitors. Do it once, enjoy it honestly.</p></div></li>
+      <li><div class="simg" style="background-image:url(img/dock.jpg)"><span class="ix">☀</span></div><div class="stx"><h4>Albert Dock</h4><div class="m">Daytime</div><p>Saturday afternoon, to feel like a person again. Water, air, food, no strobes.</p></div></li>
     </ol>
   </div>
 
@@ -591,6 +622,7 @@ ol.days p{margin:5px 0 0;color:var(--mute);font-size:14.5px}
     <p class="lede" style="margin-top:18px">You won't understand the first three people who talk to you. Normal.</p>
     <div class="words" id="words"></div>
   </div>
+  <div class="credits"><h3>Photos</h3><ul><li><a href="https://commons.wikimedia.org/wiki/File:Liverpool_Waterfront_Three_Graces_10th_January_2016_(2016-01-10_18.17.39_by_Bob_Edwards_-_24221181561).jpg" target="_blank" rel="noopener">Waterfront at night</a> — Bob  Edwards · CC BY 2.0</li><li><a href="https://commons.wikimedia.org/wiki/File:Concert_Square_2018-1.jpg" target="_blank" rel="noopener">Concert Square</a> — Rodhullandemu · CC BY-SA 4.0</li><li><a href="https://commons.wikimedia.org/wiki/File:45_-_51_Seel_Street,_Liverpool_stitch.jpg" target="_blank" rel="noopener">Seel Street</a> — Rodhullandemu · CC BY-SA 4.0</li><li><a href="https://commons.wikimedia.org/wiki/File:Bold_Street,_Liverpool_-_geograph.org.uk_-_3766176.jpg" target="_blank" rel="noopener">Bold Street</a> — Bill Boaden · CC BY-SA 2.0</li><li><a href="https://commons.wikimedia.org/wiki/File:Cartoon_art_piece_on_brick_wall_(Unsplash).jpg" target="_blank" rel="noopener">Baltic Triangle</a> — Matt Pritchard matt_pritchard · CC0</li><li><a href="https://commons.wikimedia.org/wiki/File:The_Cavern_Club,_Cavern_Souvenirs,_Mathew_Street,_Liverpool,_2012.jpg" target="_blank" rel="noopener">The Cavern Club</a> — Jen Hunter · CC BY 2.0</li><li><a href="https://commons.wikimedia.org/wiki/File:Albert_Dock,_Liverpool_-_geograph.org.uk_-_5540388.jpg" target="_blank" rel="noopener">Royal Albert Dock</a> — Humphrey Bolton · CC BY-SA 2.0</li><li><a href="https://commons.wikimedia.org/wiki/File:Bar_window_of_Black_Horse_Inn,_Nuthurst,_West_Sussex.jpg" target="_blank" rel="noopener">Pub at night</a> — Acabashi · CC BY-SA 4.0</li></ul><p>Via Wikimedia Commons. Licences as listed.</p></div>
 </section>
 
 
@@ -611,7 +643,7 @@ ol.days p{margin:5px 0 0;color:var(--mute);font-size:14.5px}
 <script>
 "use strict";
 if (sessionStorage.getItem("bhq-intro") || /[?&]shot=1/.test(location.search)) document.getElementById("splash").classList.add("skip");
-/* Bender HQ v7 — light beams, gliding pins, comet trails, photo pins, intro fly-in. Sync/crypto/BAC/OwnTracks logic unchanged from v4. */
+/* Bender HQ v8 — real Liverpool photography (Wikimedia Commons, credited in Guide). Sync/crypto/BAC/OwnTracks logic unchanged from v4. */
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const buzz = (ms) => { if (navigator.vibrate) navigator.vibrate(ms || 12); };
@@ -961,10 +993,10 @@ function drawClocks() {
 }
 
 const TRIP = [
-  {d:"2026-10-08", dow:"Thu", n:8,  t:"Arrive & first night",       p:"Check in, eat early, then Concert Square into Seel Street."},
-  {d:"2026-10-09", dow:"Fri", n:9,  t:"Bold Street & the Baltic",   p:"Proper dinner on Bold Street, then walk down to the Baltic Triangle."},
-  {d:"2026-10-10", dow:"Sat", n:10, t:"Waterfront, then Mathew St", p:"Albert Dock by day to feel human again. Cavern Quarter at night."},
-  {d:"2026-10-11", dow:"Sun", n:11, t:"Slow start, head home",      p:"Big breakfast, one last walk, travel."}
+  {d:"2026-10-08", dow:"Thu", n:8,  img:"concert", t:"Arrive & first night",       p:"Check in, eat early, then Concert Square into Seel Street."},
+  {d:"2026-10-09", dow:"Fri", n:9,  img:"baltic",  t:"Bold Street & the Baltic",   p:"Proper dinner on Bold Street, then walk down to the Baltic Triangle."},
+  {d:"2026-10-10", dow:"Sat", n:10, img:"dock",    t:"Waterfront, then Mathew St", p:"Albert Dock by day to feel human again. Cavern Quarter at night."},
+  {d:"2026-10-11", dow:"Sun", n:11, img:"bold",    t:"Slow start, head home",      p:"Big breakfast, one last walk, travel."}
 ];
 function drawToday() {
   const today = ukDate(), first = TRIP[0].d, last = TRIP[TRIP.length - 1].d;
@@ -984,8 +1016,8 @@ function drawToday() {
     big.textContent = "GG"; unit.textContent = "That's a wrap";
     when.textContent = "Liverpool, 8–11 October 2026. Same time next year?";
   }
-  $("#days").innerHTML = TRIP.map((d) => '<li class="' + (d.d === today ? "now" : "") + '"><div class="dd"><b>' + d.n + '</b><small>' + d.dow +
-    '</small></div><div><h4>' + d.t + '</h4><p>' + d.p + '</p></div></li>').join("");
+  $("#days").innerHTML = TRIP.map((d) => '<li class="' + (d.d === today ? "now" : "") + '"><div class="dimg" style="background-image:url(img/' + d.img + '.jpg)"><div class="dd"><b>' + d.n +
+    '</b><small>' + d.dow + ' · Oct</small></div></div><div class="dtx"><h4>' + d.t + '</h4><p>' + d.p + '</p></div></li>').join("");
 
   const stand = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
   const items = [
