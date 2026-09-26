@@ -256,6 +256,13 @@ table.t th{font:700 11px/1 var(--disp);letter-spacing:.12em;text-transform:upper
 .ls button{width:36px;height:36px;border-radius:11px;background:var(--p2);border:1px solid var(--line);font:700 20px/1 var(--sans);color:var(--ink)}
 .ls button:disabled{opacity:.3}
 .ls b{min-width:18px;text-align:center;font:800 22px/1 var(--disp);color:var(--ink)}
+.tally{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tcol{padding:14px;border-radius:16px;background:var(--p1);border:1px solid var(--line)}
+.tcol h3{margin:0 0 10px;display:flex;align-items:center;gap:8px;font:800 16px/1 var(--disp);letter-spacing:.1em;text-transform:uppercase}
+.tcol h3 i{width:9px;height:9px;border-radius:50%;background:var(--pc)}
+.tnums{display:grid;grid-template-columns:1fr 1fr;gap:10px 8px}
+.tnums b{display:block;font:800 30px/1 var(--disp)}
+.tnums small{display:block;margin-top:3px;font:700 10.5px/1 var(--disp);letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
 .dlog{list-style:none;margin:18px 0 0;padding:0}
 .dlog li{display:grid;grid-template-columns:52px 12px 1fr auto;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--line);font-size:15px}
 .dlog time{color:var(--mute);font-size:14px}
@@ -438,14 +445,14 @@ ol.days p{margin:5px 0 0;color:var(--mute);font-size:14.5px}
   </div>
   <div id="chartHost"></div>
 
-  <h2 class="h">Log a drink <small>tap to add</small></h2>
+  <h2 class="h">Tonight's round <small>logged by buddehbot</small></h2>
   <div id="score"></div>
   <div class="totals"><span>Pints tonight, both</span><b class="num" id="grand">0</b></div>
   <div class="meta" id="scoreMeta"></div>
 
   <div class="tele">
     <div class="ic"><svg viewBox="0 0 24 24" fill="#fff"><path d="M21.5 4.3 18.3 19.5c-.2 1.1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.4-5 9-8.1c.4-.3-.1-.5-.6-.2L5.9 13.2 1.1 11.7c-1-.3-1-1 .2-1.5L20.2 3c.9-.3 1.6.2 1.3 1.3z"/></svg></div>
-    <div><p><b>Hands full? Text buddehbot.</b> It logs drinks here with the right time, so the estimate stays honest.</p><div class="quote">"Cailyn had a wine at 9 and 2 pints since"</div></div>
+    <div><p><b>Text buddehbot what you've had.</b> He's the only one who can log drinks, with the right times — so nobody fudges the count and the BAC stays honest.</p><div class="quote">"Cailyn had a wine at 9 and 2 pints since"</div></div>
   </div>
 
   <div class="warn"><b>Estimate only.</b> A 100-year-old formula that doesn't know your food, sleep, meds or the real pour — actual BAC can be far higher. <b>Never use it to decide whether anyone can drive.</b></div>
@@ -469,7 +476,6 @@ ol.days p{margin:5px 0 0;color:var(--mute);font-size:14.5px}
     <b>17 g</b><span>Large wine — 175 ml at 12.5%</span>
     <b>−.015</b><span>BAC burned off per hour</span>
   </div>
-  <button class="btn danger" id="resetAll" style="margin-top:24px">Clear all drinks</button>
 </section>
 
 <!-- ================= TRIP ================= -->
@@ -623,7 +629,7 @@ function migrate(o) {
   s.addr = String(o.addr || ""); s.notes = String(o.notes || ""); s.rate = +o.rate > 0 ? +o.rate : 1.27; s.rateSet = !!o.rateSet;
   s.me = o.me === 1 ? 1 : 0;
   if (o.v === 3) {
-    s.people = [cleanPerson(o.people && o.people[0], 0), cleanPerson(o.people && o.people[1], 1)];
+    s.people = [0, 1].map((i) => Object.assign(cleanPerson(o.people && o.people[i], i), {dts:+(o.people && o.people[i] && o.people[i].dts) || 0}));
     s.loc = [cleanLoc(o.loc && o.loc[0]), cleanLoc(o.loc && o.loc[1])];
     s.crew = String(o.crew || ""); s.share = !!o.share; s.wake = o.wake !== false; s.mapSaved = +o.mapSaved || 0;
     s.trail = [0, 1].map((i) => Array.isArray(o.trail && o.trail[i]) ? o.trail[i].filter((t) => Array.isArray(t) && t.length === 3 && t.every(isFinite)) : []);
@@ -741,11 +747,21 @@ async function handleMsg(m) {
   const o = await unseal(m.message);
   if (!o || o.v !== 3 || (o.who !== 0 && o.who !== 1)) return;
   if (o.t === "person") {
+    /* profile fields only — drinks never come from person messages (buddehbot owns them) */
     SYNC.relayTs[o.who] = Math.max(SYNC.relayTs[o.who], +o.ts || 0);
     if (+o.ts > S.people[o.who].ts) {
-      const before = S.people[o.who].drinks.length;
-      S.people[o.who] = cleanPerson(o, o.who); save(); scheduleDraw();
-      if (o.by === "buddehbot" && S.people[o.who].drinks.length > before) toast("buddehbot logged a drink for " + NAMES[o.who]);
+      const keep = S.people[o.who];
+      S.people[o.who] = Object.assign(cleanPerson(o, o.who), {drinks:keep.drinks, ls:keep.ls, dts:keep.dts || 0});
+      save(); scheduleDraw();
+    }
+  } else if (o.t === "drinks") {
+    /* only buddehbot publishes these */
+    const p = S.people[o.who];
+    if (+o.ts > (p.dts || 0)) {
+      const before = p.drinks.length, c = cleanPerson({drinks:o.drinks, ls:o.ls}, o.who);
+      p.drinks = c.drinks; p.ls = c.ls; p.dts = +o.ts;
+      save(); scheduleDraw();
+      if (p.drinks.length > before) { const d = p.drinks[p.drinks.length - 1]; toast(NAMES[o.who] + " · " + KINDS[d[1]][0] + " logged"); }
     }
   } else if (o.t === "loc") {
     const L = cleanLoc(o);
@@ -791,7 +807,8 @@ async function flushPending() {
   if (!SYNC.key) return;
   for (const w of S.pend.slice()) {
     const p = S.people[w];
-    if (await send(Object.assign({v:3, t:"person", who:w}, p))) {
+    const {drinks, ls, dts, ...profile} = p;          /* never send drinks — buddehbot is the only writer */
+    if (await send(Object.assign({v:3, t:"person", who:w}, profile))) {
       S.pend = S.pend.filter((x) => x !== w);
       SYNC.relayTs[w] = Math.max(SYNC.relayTs[w], p.ts);
     }
@@ -962,41 +979,23 @@ function drawToday() {
   $("#stPints").textContent = fmtN(rowCount(S.people[0].drinks, "pint") + rowCount(S.people[1].drinks, "pint"));
 }
 
-/* ---------- tonight: one-tap drink logger ---------- */
-const DRINK_UI = [["p", "Pint", "568 ml"], ["h", "Half", "284 ml"], ["s", "Shot", "25 ml"], ["d", "Double", "50 ml"], ["w", "Wine", "175 ml"], ["c", "Cocktail", "~2 units"]];
-const ICON_UNDO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>';
+/* ---------- tonight: read-only tally (drinks are logged only by buddehbot) ---------- */
 function drawTally() {
-  const w = S.logFor === 1 ? 1 : 0, list = tonight(w), p = S.people[w];
-  const cnt = (k) => list.filter((d) => d[1] === k).length;
-  const last = list[list.length - 1];
-  let h = '<div class="who">' + [0, 1].map((i) => '<button data-lw="' + i + '" class="' + (i === w ? "on" : "") + '" style="--pc:' + UI_C[i] + '">' + NAMES[i] + "</button>").join("") + "</div>";
-  h += '<div class="dgrid" style="--pc:' + UI_C[w] + '">' + DRINK_UI.map(([k, l, sub]) => {
-    const n = cnt(k);
-    return '<button data-k="' + k + '" aria-label="Log a ' + l.toLowerCase() + " for " + NAMES[w] + '"><b class="num' + (n ? " has" : "") + '">' + n + "</b><span>" + l + "</span><small>" + sub + "</small></button>";
-  }).join("") + "</div>";
-  h += '<div class="lrow"><button class="undo" id="undoBtn"' + (last ? "" : " disabled") + ">" + ICON_UNDO + "Undo" + (last ? " " + KINDS[last[1]][0] : "") + "</button>" +
-       '<div class="ls">Ls<button data-ls="-1" aria-label="Remove an L"' + (p.ls ? "" : " disabled") + '>−</button><b class="num">' + p.ls + '</b><button data-ls="1" aria-label="Add an L">+</button></div></div>';
-  const all = [0, 1].flatMap((i) => tonight(i).map((d) => [d[0], d[1], i])).sort((x, y) => y[0] - x[0]).slice(0, 8);
-  h += all.length ? '<ol class="dlog">' + all.map((d) => '<li style="--pc:' + UI_C[d[2]] + '"><time class="num">' + ukTime(d[0] * 1000) + "</time><i></i><span>" + NAMES[d[2]] + "</span><b>" + KINDS[d[1]][0] + "</b></li>").join("") + "</ol>"
-                  : '<p class="empty">Nothing logged tonight yet.</p>';
-  const host = $("#score");
-  host.innerHTML = h;
-  host.querySelectorAll("[data-lw]").forEach((btn) => btn.onclick = () => { S.logFor = +btn.dataset.lw; save(); buzz(6); drawTally(); });
-  host.querySelectorAll("[data-k]").forEach((btn) => btn.onclick = () => {
-    p.drinks.push([nowS(), btn.dataset.k]); queuePerson(w, true); buzz(18);
-    toast(NAMES[w] + " · " + KINDS[btn.dataset.k][0] + " logged"); drawAll();
-  });
-  host.querySelectorAll("[data-ls]").forEach((btn) => btn.onclick = () => { p.ls = Math.max(0, p.ls + (+btn.dataset.ls)); queuePerson(w, true); buzz(); drawAll(); });
-  $("#undoBtn").onclick = () => {
-    const ns = nightStart();
-    for (let i = p.drinks.length - 1; i >= 0; i--) if (p.drinks[i][0] >= ns) { p.drinks.splice(i, 1); break; }
-    queuePerson(w, true); buzz(); drawAll();
-  };
+  const cols = [0, 1].map((w) => {
+    const list = tonight(w);
+    const cell = (n, l) => '<div><b class="num">' + n + "</b><small>" + l + "</small></div>";
+    return '<div class="tcol" style="--pc:' + UI_C[w] + '"><h3><i></i>' + NAMES[w] + '</h3><div class="tnums">' +
+      cell(fmtN(rowCount(list, "pint")), "Pints") + cell(fmtN(rowCount(list, "shot")), "Shots") +
+      cell(fmtN(rowCount(list, "other")), "Wine · cktl") + cell(S.people[w].ls, "Ls") + "</div></div>";
+  }).join("");
+  const all = [0, 1].flatMap((i) => tonight(i).map((d) => [d[0], d[1], i])).sort((x, y) => y[0] - x[0]).slice(0, 12);
+  const log = all.length ? '<ol class="dlog">' + all.map((d) => '<li style="--pc:' + UI_C[d[2]] + '"><time class="num">' + ukTime(d[0] * 1000) + "</time><i></i><span>" + NAMES[d[2]] + "</span><b>" + KINDS[d[1]][0] + "</b></li>").join("") + "</ol>"
+                         : '<p class="empty">Nothing logged tonight yet.</p>';
+  $("#score").innerHTML = '<div class="tally">' + cols + "</div>" + log;
   $("#grand").textContent = fmtN(rowCount(tonight(0), "pint") + rowCount(tonight(1), "pint"));
-  const newest = S.people[0].ts > S.people[1].ts ? S.people[0] : S.people[1];
-  const syncIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.5 6.2M3 12A9 9 0 0 1 18.5 5.8M18 2v4h-4M6 22v-4h4"/></svg>';
-  $("#scoreMeta").innerHTML = S.crew ? syncIcon + (newest.ts > 1 ? "Updated " + ago(newest.ts) + " by " + esc(newest.by || "a phone") : "Synced with your crew")
-                                     : "Saved on this phone only — join the crew on Trip to sync";
+  const last = Math.max(S.people[0].dts || 0, S.people[1].dts || 0);
+  const icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+  $("#scoreMeta").innerHTML = icon + (last ? "Logged by buddehbot · last update " + ago(last) : "Only buddehbot can log drinks — text him");
 }
 function drawBac() {
   [0, 1].forEach((w) => {
@@ -1490,11 +1489,6 @@ $("#wakeTg").onclick = () => { S.wake = !S.wake; save(); if (S.wake) acquireWake
     S.people[w].hr = u; queuePerson(w, true); drawHr();
   });
 });
-$("#resetAll").onclick = () => {
-  if (!confirm("Clear every drink for both of you, on both phones?")) return;
-  [0, 1].forEach((w) => { S.people[w].drinks = []; S.people[w].ls = 0; queuePerson(w, true); });
-  drawAll();
-};
 $("#rate").value = S.rate;
 $("#rate").addEventListener("input", (e) => { const r = parseFloat(e.target.value); if (r > 0) { S.rate = r; S.rateSet = true; save(); drawFx(); drawToday(); } });
 $("#gbp").addEventListener("input", drawFx);
